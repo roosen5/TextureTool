@@ -1,0 +1,9 @@
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QPushbutton>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMessageBox>
+#include <QtGui/QScreen>
+#include <QtGui/QPixmap>
+#include <QtCore/QTimer>
