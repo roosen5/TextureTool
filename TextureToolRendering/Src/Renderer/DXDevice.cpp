@@ -52,3 +52,9 @@ HRESULT DXDevice::InitializeDevice()
 	}
 	return result;
 }
+
+void DXDevice::ShutDown()
+{
+	SAFE_RELEASE(mDevice);
+	SAFE_RELEASE(mDeviceContext);
+}

@@ -2,10 +2,13 @@
 #pragma hdrstop
 #include "RenderView.h"
 
-RenderView::RenderView()
+RenderView::RenderView(QWidget* pWidget) : QWidget::QWidget(pWidget)
 {
+	setLayout(new QVBoxLayout(this));
+	layout()->addWidget(new QComboBox(this));
     mRenderTargetView   = nullptr;
     mRasterizerState    = nullptr;
+	mSwapChain = nullptr;
 
 // Disable updates, because updates would clear the screen automatically
 	setUpdatesEnabled(false);
@@ -14,9 +17,13 @@ RenderView::RenderView()
 
 RenderView::~RenderView()
 {
+	SAFE_RELEASE(mRenderTargetView);
+	SAFE_RELEASE(mRasterizerState);
+	SAFE_RELEASE(mSwapChain);
+	SAFE_RELEASE(mSamplerState);
 }
 
-void RenderView::Render2DTexture()
+void RenderView::Render2DTexture(const Texture* pTexture)
 {
 	Model model;
 
@@ -52,6 +59,11 @@ void RenderView::Render2DTexture()
 	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	Context->IASetInputLayout((ID3D11InputLayout*)material->GetInputLayout());
 
+	ID3D11ShaderResourceView* shaderResourceView = (ID3D11ShaderResourceView*)pTexture->GetResourceView();
+	Context->PSSetShaderResources(0, 1, &shaderResourceView);
+	Context->VSSetShaderResources(0, 1, &shaderResourceView);
+
+
 	Context->OMSetRenderTargets(1, &mRenderTargetView, nullptr);
 
 	Context->Draw(6, 0);
@@ -59,6 +71,11 @@ void RenderView::Render2DTexture()
 
 void RenderView::OnResized()
 {
+	if (mSwapChain == nullptr)
+	{
+		// If there's no swap chain, return, no need to resize if there's nothing
+		return;
+	}
 	// Resize the swap chain
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	mSwapChain->GetDesc(&swapChainDesc);
@@ -100,7 +117,7 @@ void RenderView::resizeEvent(QResizeEvent* pEvent)
 	OnResized();
 }
 
-HRESULT RenderView::InitializeDirectX()
+HRESULT RenderView::Initialize()
 {
 	// Create the swap chain
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
@@ -178,6 +195,26 @@ HRESULT RenderView::InitializeDirectX()
 	// Create the rasterizer state object.
 	result = DXDevice::GetDevice()->CreateRasterizerState(&rasterizerDesc, &mRasterizerState);
 
+	// Setup the sampler
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.BorderColor[0] = 1.0f;
+	samplerDesc.BorderColor[1] = 1.0f;
+	samplerDesc.BorderColor[2] = 1.0f;
+	samplerDesc.BorderColor[3] = 1.0f;
+	samplerDesc.MinLOD = -FLT_MAX;
+	samplerDesc.MaxLOD = FLT_MAX;
+
+	result = DXDevice::GetDevice()->CreateSamplerState(&samplerDesc, &mSamplerState);
+	DXDevice::GetContext()->PSSetSamplers(0, 1, &mSamplerState);
+
 	return result;
 }
 
@@ -188,12 +225,12 @@ void RenderView::Clear(const QColor& pClearColor)
 	clearColors[1] = pClearColor.greenF();
 	clearColors[2] = pClearColor.blueF();
 	clearColors[3] = 1;
-	//DXDevice::GetContext()->ClearRenderTargetView(mRenderTargetView, clearColors);
+	DXDevice::GetContext()->ClearRenderTargetView(mRenderTargetView, clearColors);
 }
 
 void RenderView::Blit()
 {
-	printf("\n" __FUNCTION__);
+	//printf("\n" __FUNCTION__);
 	mSwapChain->Present((UINT)1, 0);
 }
 

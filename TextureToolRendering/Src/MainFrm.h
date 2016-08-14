@@ -17,9 +17,6 @@ public:
 	RenderView* GetRenderInterface() { return mRenderInterface; }
 private slots:
 	void Update();
-	void OnClearBtnClicked();
-	void OnRenderPlaneBtnClicked();
-	void OnBlitBtnClicked();
 
 private:
 	Ui::TextureToolRenderingClass mUi;

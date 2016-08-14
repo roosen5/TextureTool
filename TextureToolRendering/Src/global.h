@@ -17,3 +17,5 @@
 		var = nullptr; \
 	} \
 }
+
+#define E_UNSUPPORTEDFILE -0xFF00001

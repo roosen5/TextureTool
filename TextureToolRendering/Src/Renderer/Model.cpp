@@ -13,6 +13,7 @@ Model::Model()
 
 Model::~Model()
 {
+	SAFE_RELEASE(mVertexBuffer);
 }
 
 void Model::Render()
@@ -25,24 +26,22 @@ HRESULT Model::LoadPlaneVertices()
 	// create a triangle using the VERTEX struct
 	Vertex vertices[6];
 	vertices[0].Position = DirectX::XMFLOAT3(-1.0f, 1.0f, 0.0f);
-	vertices[0].TexCoord = DirectX::XMFLOAT2(1, 1);
+	vertices[0].TexCoord = DirectX::XMFLOAT2(0, 0);
 
 	vertices[1].Position = DirectX::XMFLOAT3(1.0, 1.0f, 0.0f);
-	vertices[1].TexCoord = DirectX::XMFLOAT2(1, 1);
+	vertices[1].TexCoord = DirectX::XMFLOAT2(1, 0);
 
 	vertices[2].Position = DirectX::XMFLOAT3(1.0, -1.0, 0.0f);
-	vertices[2].TexCoord = DirectX::XMFLOAT2(0, 1);
-
-
+	vertices[2].TexCoord = DirectX::XMFLOAT2(1, 1);
 
 	vertices[3].Position = DirectX::XMFLOAT3(-1.0f, 1.0f, 0.0f);
-	vertices[3].TexCoord = DirectX::XMFLOAT2(1, 1);
+	vertices[3].TexCoord = DirectX::XMFLOAT2(0, 0);
 
 	vertices[4].Position = DirectX::XMFLOAT3(1.0, -1.0, 0.0f);
-	vertices[4].TexCoord = DirectX::XMFLOAT2(0, 1);
+	vertices[4].TexCoord = DirectX::XMFLOAT2(1, 1);
 
 	vertices[5].Position = DirectX::XMFLOAT3(-1.0, -1.0f, 0.0f);
-	vertices[5].TexCoord = DirectX::XMFLOAT2(1, 1);
+	vertices[5].TexCoord = DirectX::XMFLOAT2(0, 1);
 
 	// create the vertex buffer
 	D3D11_BUFFER_DESC bufferDesc;
@@ -70,6 +69,29 @@ HRESULT Model::LoadPlaneVertices()
 	return result;
 }
 
+Material::Material():
+	mVertexShader(nullptr),
+	mPixelShader(nullptr),
+	mInputLayout(nullptr)
+{
+
+}
+
+Material::~Material()
+{
+	if (mVertexShader != nullptr)
+	{
+		ShaderManager::UnloadShader(mVertexShader->GetShaderName().c_str());
+	}
+
+	if (mPixelShader != nullptr)
+	{
+		ShaderManager::UnloadShader(mPixelShader->GetShaderName().c_str());
+	}
+
+	SAFE_RELEASE(mInputLayout);
+}
+
 void Material::SetupInputLayout()
 {
 	// Create the input layout for the vertex shader.
@@ -82,6 +104,7 @@ void Material::SetupInputLayout()
 	HRESULT result = DXDevice::GetDevice()->CreateInputLayout(vertexLayoutDesc,
 					 _countof(vertexLayoutDesc), GetVertexShader()->GetBlob()->GetBufferPointer(),
 					 GetVertexShader()->GetBlob()->GetBufferSize(), &mInputLayout);
+
 	if FAILED(result)
 	{
 		ShowError(result, "DXDevice::GetDevice()->CreateInputLayout");

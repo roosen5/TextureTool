@@ -11,6 +11,8 @@ struct Vertex
 class Material
 {
 public:
+	Material();
+	~Material();
 
 	// Create the input layout for the vertex shader.
 	void                      SetupInputLayout();
@@ -40,7 +42,9 @@ class Model
 public:
 	Model();
 	~Model();
+
 	void                      Render();
+
 	HRESULT                   LoadPlaneVertices();
 
 	ID3D11Buffer*             GetVertexBuffer() { return mVertexBuffer; }

@@ -39,19 +39,16 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{00c19e01-4927-40b3-a7de-a096b2c31214}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Widgets">
+      <UniqueIdentifier>{30799006-27c0-44a8-ba60-e2f6e7d2e030}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{58ec5cc7-a4b2-4899-99f7-e72d7f5bf33f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_TextureToolRendering.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DXDevice.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Surface.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Texture.cpp">
-      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Src\TT_PCH.cpp">
       <Filter>Source Files</Filter>
@@ -71,17 +68,14 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MainFrm.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ShaderManager.cpp">
-      <Filter>Source Files\Renderer</Filter>
+    <ClCompile Include="Src\Widgets\TextureResourceEditor.cpp">
+      <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Shader.cpp">
-      <Filter>Source Files\Renderer</Filter>
+    <ClCompile Include="Src\Widgets\RenderView.cpp">
+      <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Model.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\TextureToolRendering\Src\Widgets\TextureResourceEditor.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeneratedFiles\Debug\moc_RenderView.cpp">
+      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_TextureResourceEditor.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -89,14 +83,26 @@
     <ClCompile Include="GeneratedFiles\Release\moc_TextureResourceEditor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Src\RenderView.cpp">
+    <ClCompile Include="QTUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Renderer\Shader.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_RenderView.cpp">
-      <Filter>Generated Files\Debug</Filter>
+    <ClCompile Include="Src\Renderer\ShaderManager.cpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_RenderView.cpp">
-      <Filter>Generated Files\Release</Filter>
+    <ClCompile Include="Src\Renderer\Surface.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Renderer\Texture.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Renderer\Model.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Renderer\DXDevice.cpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,14 +115,14 @@
     <CustomBuild Include="Src\MainFrm.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\TextureToolRendering\Src\Widgets\TextureResourceEditor.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\TextureToolRendering\Src\Widgets\TextureResourceEditor.ui">
+    <CustomBuild Include="Src\Widgets\TextureResourceEditor.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Src\RenderView.h">
-      <Filter>Source Files\Renderer</Filter>
+    <CustomBuild Include="Src\Widgets\TextureResourceEditor.h">
+      <Filter>Source Files\Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Widgets\RenderView.h">
+      <Filter>Source Files\Widgets</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -132,35 +138,38 @@
     <ClInclude Include="Src\QTIncludes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\DXDevice.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\DXIncludes.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Surface.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Texture.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Src\TT_PCH.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\DebugUtils.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ShaderManager.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Shader.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Model.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_TextureResourceEditor.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QTUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Renderer\Shader.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Renderer\ShaderManager.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Renderer\Surface.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Renderer\Texture.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Renderer\Model.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Renderer\DXDevice.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Renderer\DXIncludes.h">
+      <Filter>Source Files\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

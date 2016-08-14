@@ -12,6 +12,7 @@ public:
 	ID3DBlob*                 GetBlob() { return mShaderBlob; }
 
 	void                      SetShaderName(const wchar_t* pName) { mName = pName; }
+	std::wstring              GetShaderName() { return mName; }
 
 private:
 	std::wstring              mName;

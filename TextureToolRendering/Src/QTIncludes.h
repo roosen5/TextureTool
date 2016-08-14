@@ -6,4 +6,8 @@
 #include <QtWidgets/QMessageBox>
 #include <QtGui/QScreen>
 #include <QtGui/QPixmap>
+#include <QtGui/QImageReader>
+#include <QtGui/qevent.h>
 #include <QtCore/QTimer>
+#include <QtCore/QMimeData>
+#include <QtCore/QFileInfo>

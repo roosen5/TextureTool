@@ -6,5 +6,7 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	MainFrm w;
 	w.show();
-	return a.exec();
+	int returnValue = a.exec();
+	DXDevice::ShutDown();
+	return returnValue ;
 }

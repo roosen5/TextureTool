@@ -89,7 +89,8 @@ void ShaderManager::UnloadShader(const wchar_t* pShaderName)
 	shaderEntry.ref--;
 	if (shaderEntry.ref == 0)
 	{
-		printf("DELETING %ls", pShaderName);
+		printf("Releasing shader %ls", pShaderName);
+		delete shaderEntry.shader;
 	}
 }
 

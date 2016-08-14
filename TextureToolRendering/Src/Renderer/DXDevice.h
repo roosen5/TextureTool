@@ -13,6 +13,7 @@ public:
 
 	static ID3D11DeviceContext* GetContext() { return mDeviceContext; }
 
+	static void                 ShutDown();
 protected:
 	// The device
 	static ID3D11Device*        mDevice;
