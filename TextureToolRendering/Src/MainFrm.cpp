@@ -3,7 +3,10 @@
 MainFrm::MainFrm(QWidget* pParent)
 	: QMainWindow(pParent)
 {
+	// Setup the ui
 	mUi.setupUi(this);
+
+	// Create the device
 	HRESULT result = DXDevice::InitializeDevice();
 	if FAILED(result)
 	{
@@ -11,23 +14,50 @@ MainFrm::MainFrm(QWidget* pParent)
 		QApplication::quit();
 	}
 
-
 	mUi.mRenderViewFrame->setLayout(new QVBoxLayout(mUi.mRenderViewFrame));
-	RenderView* renderView = new RenderView(this);
-	mUi.mRenderViewFrame->layout()->addWidget(renderView);
+	mRenderInterface = new RenderView();
+	mUi.mRenderViewFrame->layout()->addWidget(mRenderInterface );
 
-	RenderInterface* renderInterface = new RenderInterface(renderView);
 
-	result = renderInterface->InitializeDirectX();
+	result = mRenderInterface->InitializeDirectX();
 	if FAILED(result)
 	{
 		ShowError(result, "renderInterface->InitializeDirectX", this);
 		QApplication::quit();
 	}
-	renderInterface->Clear(QColor(Qt::green));
+
+	connect(mUi.mClearBtn, SIGNAL(clicked()), SLOT(OnClearBtnClicked()));
+	connect(mUi.mRenderPlaneBtn, SIGNAL(clicked()), SLOT(OnRenderPlaneBtnClicked()));
+	connect(mUi.mBlitBtn, SIGNAL(clicked()), SLOT(OnBlitBtnClicked()));
 }
 
 MainFrm::~MainFrm()
 {
+	delete mRenderInterface;
+}
 
+void MainFrm::Update()
+{
+	mRenderInterface->Render2DTexture();
+	mRenderInterface->Blit();
+}
+
+void MainFrm::OnClearBtnClicked()
+{
+	mRenderInterface->Clear(QColor(Qt::red));
+}
+
+void MainFrm::OnRenderPlaneBtnClicked()
+{
+	mRenderInterface->Render2DTexture();
+}
+
+void MainFrm::OnBlitBtnClicked()
+{
+	mRenderInterface->Blit();
+}
+
+void MainFrm::resizeEvent(QResizeEvent *event)
+{
+	Base::resizeEvent(event);
 }

@@ -1,32 +1,42 @@
-#ifndef RENDERVIEW_H
-#define RENDERVIEW_H
-
-FORWARD_DECLARE_CLASS(RenderInterface);
+#pragma once
 class RenderView : public QWidget
 {
 	Q_OBJECT
-
 	typedef QWidget Base;
 public:
-	RenderView(QWidget* pParent);
+
+	RenderView();
 	~RenderView();
+
+	void                    Render2DTexture();
+	// Initializes DirectX and sets up DXDevice variables.
+	HRESULT                 InitializeDirectX();
+
+	void                    Clear(const QColor& pClearColor);
 
 	// Returns the widget's WinID, which is actually a windows handle
 	HWND                    GetWindowHandle() { return (HWND)winId(); }
 
-signals:
-	// The signal that will be emitted when the View wants to be re-drawn
-	void                    WMPaintRequested();
+	ID3D11RasterizerState*  GetRasterizerState() { return mRasterizerState; }
+
+	// Renders the actual frame to the QT Widget.
+	void                    Blit();
 
 protected:
-	// Override the paintEngine and return null inside it
-	virtual QPaintEngine*	paintEngine() const override;
 
-	// Override the paintEvent since it does not work correctly with DirectX
-	virtual void            paintEvent(QPaintEvent *event) override;
+	// The render target view
+	ID3D11RenderTargetView* mRenderTargetView;
 
-	// Override the nativeEvent because we want to catch WM_PAINT events, paintEvent won't work on its own
-	virtual bool            nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+	// The rasterizer state
+	ID3D11RasterizerState*  mRasterizerState;
+
+	// The swap chain
+	IDXGISwapChain*			mSwapChain;
+
+	// Resize the swap chain and render target buffer
+	void                    OnResized();
+
+	virtual void            resizeEvent(QResizeEvent* pEvent) override;
+
 };
 
-#endif // RENDERVIEW_H

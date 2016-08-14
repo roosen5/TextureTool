@@ -36,6 +36,9 @@
     <Filter Include="Source Files\Renderer">
       <UniqueIdentifier>{f61aaceb-f442-4aad-9386-c4073cfa814c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{00c19e01-4927-40b3-a7de-a096b2c31214}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_TextureToolRendering.cpp">
@@ -43,24 +46,6 @@
     </ClCompile>
     <ClCompile Include="Src\DXDevice.cpp">
       <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\RenderInterface.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_RenderInterface.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_RenderInterface.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\RenderView.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_RenderView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_RenderView.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Src\Surface.cpp">
       <Filter>Source Files\Renderer</Filter>
@@ -86,6 +71,33 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MainFrm.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Src\ShaderManager.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Shader.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Model.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TextureToolRendering\Src\Widgets\TextureResourceEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_TextureResourceEditor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_TextureResourceEditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RenderView.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_RenderView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_RenderView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="TextureToolRendering.ui">
@@ -94,14 +106,17 @@
     <CustomBuild Include="TextureToolRendering.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Src\RenderInterface.h">
-      <Filter>Source Files\Renderer</Filter>
+    <CustomBuild Include="Src\MainFrm.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\TextureToolRendering\Src\Widgets\TextureResourceEditor.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\TextureToolRendering\Src\Widgets\TextureResourceEditor.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Src\RenderView.h">
       <Filter>Source Files\Renderer</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Src\MainFrm.h">
-      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -135,8 +150,28 @@
     <ClInclude Include="Src\DebugUtils.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Src\ShaderManager.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Shader.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Model.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_TextureResourceEditor.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TextureToolRendering.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\Shaders\TexturePreviewPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\TexturePreviewVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

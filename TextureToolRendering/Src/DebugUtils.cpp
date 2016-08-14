@@ -1,5 +1,6 @@
 #include "TT_PCH.h"
 
+// Shows an error message with additional detail using _com_error
 void ShowError(HRESULT pResult, const char* pCalledFunction, QWidget* pParentWidget)
 {
 	_com_error error(pResult);
