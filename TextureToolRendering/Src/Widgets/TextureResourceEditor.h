@@ -4,9 +4,21 @@
 #include <QWidget>
 #include "ui_TextureResourceEditor.h"
 
-FORWARD_DECLARE_CLASS(Texture);
-FORWARD_DECLARE_CLASS(RenderView);
-FORWARD_DECLARE_CLASS(RenderInterface);
+FORWARD_DECLARE_CLASS(Texture)
+FORWARD_DECLARE_CLASS(RenderView)
+FORWARD_DECLARE_CLASS(RenderInterface)
+
+Q_DECLARE_METATYPE(DXGI_FORMAT)
+
+struct TextureEntry // MATHIJS maybe class
+{
+	TextureEntry():originalTexture(nullptr), convertedTexture(nullptr){} 
+	~TextureEntry();
+	// The texture that will not be changed, 
+	Texture* originalTexture; 
+	Texture* convertedTexture;
+};
+
 
 class TextureResourceEditor : public QWidget
 {
@@ -27,9 +39,22 @@ protected:
 	// Loads the texture, doesn't add it to the resource list
 	HRESULT                      LoadTexture(const char* pFileName, Texture*& pTexture);
 
+	// Create supported formats list
+	void                         SetupSupportedTextureFormats();
+
+	// All the conversion functions happen inside
+	void                         ConvertTexture();
+
+	// Create supported formats list
+	void                         AddSupportedTextureFormat(DXGI_FORMAT pFormat, const QString& pFormatName);
+	
+	// Iterates through the supported texture list to find the format
+	void                         SetSupportedTextureCBToFormat(DXGI_FORMAT pFormat);
+
 	// Adds the texture to the resource list
 	void                         AddTexture(const Texture* pTexture);
 
+	void                         RenderPreviewImage();
 	// Drag and drop functions
 	virtual void                 dragEnterEvent(QDragEnterEvent *event) override;
 
@@ -44,14 +69,16 @@ protected:
 
 private slots:
 	void                         OnTextureSelectorRowChanged();
+	void                         OnCompressionTypeIndexChanged();
 private:
 
-	// Current previewing texture
-	Texture*                     mPreviewTexture;
+
 	// The list of textures
-	std::vector<Texture*>        mTextureList;
+	std::vector<TextureEntry*>   mTextureList;
+
 	// The RenderView where the texture will be previewed on
 	RenderView*                  mTexturePreviewRV;
+
 	// The RenderInterface used to preview images 
 	RenderInterface*             mTexturePreviewRI; 
 

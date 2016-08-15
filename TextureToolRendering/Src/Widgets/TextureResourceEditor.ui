@@ -6,34 +6,97 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>678</width>
-    <height>624</height>
+    <width>1177</width>
+    <height>846</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>TextureResourceEditor</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
-   <item>
-    <widget class="QListWidget" name="mTextureSelector"/>
-   </item>
-   <item>
-    <widget class="RenderView" name="mTexturePreviewRV" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>400</width>
-       <height>400</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>400</width>
-       <height>400</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-  </layout>
+  <widget class="RenderView" name="mTexturePreviewRV" native="true">
+   <property name="geometry">
+    <rect>
+     <x>900</x>
+     <y>200</y>
+     <width>200</width>
+     <height>200</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>200</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>200</width>
+     <height>200</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="mTextureSelector">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>256</width>
+     <height>731</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QFrame" name="mTextureConvertPropertiesFrame">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>100</y>
+     <width>421</width>
+     <height>591</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QComboBox" name="mCompressionTypeCB">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>90</y>
+      <width>241</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="mGenerateMipmapsCB">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>200</y>
+      <width>241</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Generate mipmaps</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mConvertBtn">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>480</y>
+      <width>291</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Convert</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

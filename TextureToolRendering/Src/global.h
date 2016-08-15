@@ -1,4 +1,4 @@
-#define FORWARD_DECLARE_CLASS(className) class className
+#define FORWARD_DECLARE_CLASS(className) class className;
 
 #define SAFE_DELETE(var) \
 {\

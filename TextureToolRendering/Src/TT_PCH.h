@@ -10,6 +10,7 @@
 #include "Widgets/TextureResourceEditor.h"
 #include "Widgets/RenderView.h"
 #include "MainFrm.h"
+#include "TextureConverter.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Surface.h"
 #include "Renderer/Shader.h"

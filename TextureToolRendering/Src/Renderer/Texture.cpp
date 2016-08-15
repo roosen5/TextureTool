@@ -19,3 +19,13 @@ Texture::~Texture()
 	SAFE_RELEASE(m2DTexture);
 	SAFE_RELEASE(mShaderResourceView);
 }
+
+void Texture::Set2DTexture(ID3D11Texture2D* pTexture2D)
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	pTexture2D->GetDesc(&textureDesc);
+	mFormat = textureDesc.Format;
+	mWidth = textureDesc.Width;
+	mHeight = textureDesc.Height;
+	m2DTexture = pTexture2D;
+}
