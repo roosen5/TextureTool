@@ -1,4 +1,5 @@
 #pragma once
+typedef std::vector<Surface*> SurfaceList;
 class Surface
 {
 public:
@@ -6,25 +7,44 @@ public:
 	Surface(const char* pFileName);
 	~Surface();
 
-	void          Assign(const Surface* pSurface);
+	void              Setup(unsigned int pWidth, unsigned int pHeight, uint pRowPitch, size_t pDepthPitch);
 
-	void          LoadFromFile(const char* pFileName);
+	void              Assign(const Surface* pSurface);
 
-	unsigned int  GetWidth() const { return mImage.width(); }
+	void              LoadFromFile(const char* pFileName);
 
-	unsigned int  GetHeight() const{ return mImage.height(); }
+	unsigned int      GetWidth() const { return mWidth; }
 
-	int           GetRowPitch() const { return mImage.bytesPerLine(); }
+	unsigned int      GetHeight() const{ return mHeight; }
 
-	int           GetDepthPitch() const { return mImage.byteCount(); }
+	int               GetRowPitch() const { return mRowPitch; }
 
-	const BYTE*   GetData() const { return mImage.bits(); }
+	int               GetDepthPitch() const { return mDepthPitch; }
 
-	const QImage* GetQImage() const { return &mImage; }
+	const BYTE*       GetData() const { return mData; }
 
-	void          FlipRGB() { mImage = mImage.rgbSwapped(); }
+	BYTE*             GetData() { return mData; }
+
+	void              SetFormat(DXGI_FORMAT pFormat) { mFormat = pFormat; }
+
+	DXGI_FORMAT       GetFormat() { return mFormat; }
+
+	const DXGI_FORMAT GetFormat() const { return mFormat; }
+
+	void              NormalizeColors();
+
+	void              Free();
+
 private:
-	// The QImage, where the image bits are stored
-	QImage        mImage;
+	BYTE*			  mData; // The pixel bits
+
+	unsigned int      mRowPitch;
+
+	unsigned int      mDepthPitch;
+	// Width and height
+	unsigned int      mWidth;
+	unsigned int      mHeight;
+
+	DXGI_FORMAT       mFormat;
 };
 

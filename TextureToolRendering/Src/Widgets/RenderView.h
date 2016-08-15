@@ -40,6 +40,8 @@ protected:
 	// The sampler state
 	ID3D11SamplerState*     mSamplerState;
 
+	// The blend state, defining whether we render alpha or not
+	ID3D11BlendState*       mBlendState;
 	// Resize the swap chain and render target buffer
 	void                    OnResized();
 

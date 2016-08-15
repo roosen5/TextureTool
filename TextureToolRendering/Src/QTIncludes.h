@@ -11,3 +11,5 @@
 #include <QtCore/QTimer>
 #include <QtCore/QMimeData>
 #include <QtCore/QFileInfo>
+#include <QtCore/QProcess>
+#include <QtCore/QDir>

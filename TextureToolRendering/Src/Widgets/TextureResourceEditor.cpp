@@ -1,7 +1,8 @@
 #include "TT_PCH.h"
 
 TextureResourceEditor::TextureResourceEditor(QWidget *parent)
-	: QWidget(parent)
+	: QWidget(parent),
+	  mCheckerboardTexture(nullptr)
 {
 	mUi.setupUi(this);
 
@@ -18,12 +19,18 @@ TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 
 	SetupSupportedTextureFormats();
 
-	//Texture* texture = nullptr;
-	//LoadTexture("C:/GIT/TextureTool/TextureTool/Wood.jpg", texture);
-	//AddTexture(texture);
-	
-	connect(mUi.mTextureSelector, SIGNAL(currentRowChanged(int)), SLOT(OnTextureSelectorRowChanged()));
+	LoadTexture("checkerboard.png", mCheckerboardTexture);
+
+	mUi.mTextureSelector->setCurrentRow(0);
+	RenderPreviewImage();
+
+	UpdateTextureInfo();
+
+
+	connect(mUi.mTextureSelector,   SIGNAL(currentRowChanged(int)), SLOT(OnTextureSelectorRowChanged()));
+	connect(mUi.mTextureSelector,   SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem* )));
 	connect(mUi.mCompressionTypeCB, SIGNAL(currentIndexChanged(int)), SLOT(OnCompressionTypeIndexChanged()));
+	connect(mUi.mConvertBtn, SIGNAL(pressed()), SLOT(OnTextureSelectorRowChanged()));
 }
 
 TextureResourceEditor::~TextureResourceEditor()
@@ -33,6 +40,7 @@ TextureResourceEditor::~TextureResourceEditor()
 		delete mTextureList[i];
 	}
 	mTextureList.clear();
+	SAFE_DELETE(mCheckerboardTexture);
 }
 
 void TextureResourceEditor::UpdateTextureSelector()
@@ -42,6 +50,7 @@ void TextureResourceEditor::UpdateTextureSelector()
 	for (int i = 0; i < mTextureList.size(); i++)
 	{
 		QListWidgetItem* Item = new QListWidgetItem();
+
 		// Get the filename from the original texture, converted texture might be nullptr
 		Texture* texture = mTextureList[i]->originalTexture;
 		QString textureFileName = texture->GetFileName();
@@ -59,22 +68,29 @@ void TextureResourceEditor::UpdateTextureSelector()
 
 void TextureResourceEditor::OnTextureSelectorRowChanged()
 {
-	// If the currentrow is -1, it means that nothing is selected, so return
+	 //If the currentrow is -1, it means that nothing is selected, so return
 	if (mUi.mTextureSelector->currentRow() == -1)
 	{
 		return;
 	}
 	assert(mUi.mTextureSelector->currentRow() < mTextureList.size());
-	Texture* texture = mTextureList[mUi.mTextureSelector->currentRow()]->convertedTexture;
-	if(texture ==nullptr) // Not converted yet, render the original
-		texture = mTextureList[mUi.mTextureSelector->currentRow()]->originalTexture;
-	assert(texture != nullptr); // Can't be null
+	Texture* texture = GetPreviewingTexture();
 	RenderPreviewImage();
+	UpdateTextureInfo();
+	SetSupportedTextureCBToFormat(texture->GetFormat());
+}
+
+void TextureResourceEditor::OnTextureSelectorItemDoubleClicked(QListWidgetItem* pItem)
+{
+	TextureEntry* textureEntry = (TextureEntry*)pItem->data(Qt::UserRole).value<void*>();
+	Texture* texture = textureEntry->originalTexture;
+	QTExplorerOpenFileFolder(texture->GetFileName().toLatin1().data());
 }
 
 void TextureResourceEditor::OnCompressionTypeIndexChanged()
 {
-	ConvertTexture();
+	DXGI_FORMAT cbFormat = mUi.mCompressionTypeCB->currentData().value<DXGI_FORMAT>();
+	ConvertTexture(cbFormat);
 }
 
 void TextureResourceEditor::dragLeaveEvent(QDragLeaveEvent* pEvent)
@@ -129,15 +145,21 @@ void TextureResourceEditor::dragMoveEvent(QDragMoveEvent* pEvent)
 	Base::dragMoveEvent(pEvent);
 }
 
-HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pTexture)
+HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pOutTexture)
 {
-	assert(pTexture == nullptr);
-	pTexture = new Texture();
-	// Load surface
+	assert(pOutTexture == nullptr);
+	if (!QFileInfo(pFileName).exists())
+	{
+		return STG_E_FILENOTFOUND;
+	}
 	if (!QTSupportsImageFormat(pFileName))
 	{
 		return E_UNSUPPORTEDFILE;
 	}
+	// Create out-texture
+	pOutTexture = new Texture();
+
+	// Load surface
 	Surface* surface = new Surface(pFileName);
 
 	// Create texture
@@ -165,8 +187,8 @@ HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pTex
 	{
 		return result;
 	}
-	pTexture->Set2DTexture(dx2DTexture);
-	pTexture->SetFileName(pFileName);
+	pOutTexture->Set2DTexture(dx2DTexture);
+	pOutTexture->SetFileName(pFileName);
 
 	ID3D11ShaderResourceView* surfaceResourceView;
 
@@ -182,8 +204,8 @@ HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pTex
 	{
 		return result;
 	}
-	pTexture->AddSurface(surface);
-	pTexture->SetResourceView(surfaceResourceView);
+	pOutTexture->AddSurface(surface);
+	pOutTexture->SetResourceView(surfaceResourceView);
 	return result;
 }
 
@@ -191,11 +213,12 @@ void TextureResourceEditor::SetupSupportedTextureFormats()
 {
 	AddSupportedTextureFormat(DXGI_FORMAT_R8G8B8A8_UNORM, "RGBA (32 Bit)");
 	AddSupportedTextureFormat(DXGI_FORMAT_BC1_UNORM, "DXT1/BC1");
-	AddSupportedTextureFormat(DXGI_FORMAT_BC3_UNORM, "DXT3/BC2");
-	AddSupportedTextureFormat(DXGI_FORMAT_BC5_UNORM, "DXT5/BC3"); 
+	AddSupportedTextureFormat(DXGI_FORMAT_BC2_UNORM, "DXT3/BC2");
+	AddSupportedTextureFormat(DXGI_FORMAT_BC3_UNORM, "DXT5/BC3"); 
+	AddSupportedTextureFormat(DXGI_FORMAT_BC5_UNORM, "BC5"); 
 }
 
-void TextureResourceEditor::ConvertTexture()
+void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat)
 {
 	// If the currentrow is -1, it means that nothing is selected, so return
 	if (mUi.mTextureSelector->currentRow() == -1)
@@ -208,14 +231,17 @@ void TextureResourceEditor::ConvertTexture()
 	assert(originalTexture != nullptr);
 	TextureConverter converter;
 	converter.SetOriginalTexture(originalTexture);
+	converter.SetGenerateMipmaps(mUi.mGenerateMipmapsCB->isChecked());
+	converter.SetDstFormat(pFormat);
 	Texture* convertedTexture = nullptr;
-	HRESULT result = converter.Convert(convertedTexture);
+	HRESULT result = converter.Process(convertedTexture);
 	if FAILED(result)
 	{
 		ShowError(result, "converter.Convert(convertedTexture)");
 	}
 	mTextureList[mUi.mTextureSelector->currentRow()]->convertedTexture = convertedTexture;
 	RenderPreviewImage();
+	UpdateTextureInfo();
 }
 
 void TextureResourceEditor::AddSupportedTextureFormat(DXGI_FORMAT pFormat, const QString& pFormatName)
@@ -240,27 +266,48 @@ void TextureResourceEditor::SetSupportedTextureCBToFormat(DXGI_FORMAT pFormat)
 	}
 }
 
-void TextureResourceEditor::AddTexture(const Texture* pTexture)
+void TextureResourceEditor::UpdateTextureInfo()
+{
+	Texture* texture = GetPreviewingTexture();
+	if (texture == nullptr)
+		return;
+	DXGI_FORMAT DEBUG_Format =  texture->GetFirstSurface()->GetFormat();
+	QString text = QString("Width: %1, Height: %2\nBytes: %3").arg(texture->GetWidth()).arg(texture->GetHeight()).arg(texture->GetFirstSurface()->GetDepthPitch());
+	mUi.mPreviewTextureInfo->setText(text);
+}
+
+TextureEntry* TextureResourceEditor::AddTexture(const Texture* pTexture)
 {
 	TextureEntry* textureEntry = new TextureEntry(); // Mathijs maybe stack
 	textureEntry->originalTexture = (Texture*)pTexture;
 	textureEntry->convertedTexture = nullptr;
 	mTextureList.push_back(textureEntry);
 	UpdateTextureSelector();
+	return textureEntry;
 }
 
-void TextureResourceEditor::RenderPreviewImage()
+Texture* TextureResourceEditor::GetPreviewingTexture()
 {
 	// If the currentrow is -1, it means that nothing is selected, so return
 	if (mUi.mTextureSelector->currentRow() == -1) 
 	{
-		return;
+		return nullptr;
 	}
 	TextureEntry* textureEntry = mTextureList[mUi.mTextureSelector->currentRow()];
 	Texture* previewTexture = textureEntry->convertedTexture;
 	if(previewTexture ==nullptr)
 		previewTexture = textureEntry->originalTexture;
-	assert(previewTexture != nullptr); // Converted texture may be null, but the original may not
+	assert(previewTexture != nullptr); // Converted texture may be null, but the original may not, since we checked for non selection
+	return previewTexture;
+}
+
+void TextureResourceEditor::RenderPreviewImage()
+{
+	Texture* previewTexture = GetPreviewingTexture();
+	if (previewTexture == nullptr)
+		return;
+	// Clear the screen with the alpha checkerboard texture
+	mTexturePreviewRV->Render2DTexture(mCheckerboardTexture);
 	mTexturePreviewRV->Render2DTexture(previewTexture);
 	mTexturePreviewRV->Blit();
 }
@@ -293,6 +340,6 @@ void TextureResourceEditor::resizeEvent(QResizeEvent* pEvent)
 // TextureEntry implementation
 TextureEntry::~TextureEntry()
 {
-	delete originalTexture;
-	delete convertedTexture;
+	SAFE_DELETE(originalTexture);
+	SAFE_DELETE(convertedTexture);
 }

@@ -4,15 +4,18 @@
 
 #include "global.h"
 #include "Renderer/DXIncludes.h"
+
+#include "DirectXTex.h"
+
 #include "QTIncludes.h"
 #include "DebugUtils.h"
 #include "QtUtils.h"
 #include "Widgets/TextureResourceEditor.h"
 #include "Widgets/RenderView.h"
 #include "MainFrm.h"
-#include "TextureConverter.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Surface.h"
+#include "TextureConverter.h"
 #include "Renderer/Shader.h"
 #include "Renderer/ShaderManager.h"
 #include "Renderer/Model.h"

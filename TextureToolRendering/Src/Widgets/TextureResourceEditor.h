@@ -43,7 +43,7 @@ protected:
 	void                         SetupSupportedTextureFormats();
 
 	// All the conversion functions happen inside
-	void                         ConvertTexture();
+	void                         ConvertTexture(DXGI_FORMAT pFormat);
 
 	// Create supported formats list
 	void                         AddSupportedTextureFormat(DXGI_FORMAT pFormat, const QString& pFormatName);
@@ -51,8 +51,11 @@ protected:
 	// Iterates through the supported texture list to find the format
 	void                         SetSupportedTextureCBToFormat(DXGI_FORMAT pFormat);
 
+	void                         UpdateTextureInfo();
 	// Adds the texture to the resource list
-	void                         AddTexture(const Texture* pTexture);
+	TextureEntry*                AddTexture(const Texture* pTexture);
+
+	Texture*                     GetPreviewingTexture();
 
 	void                         RenderPreviewImage();
 	// Drag and drop functions
@@ -69,9 +72,16 @@ protected:
 
 private slots:
 	void                         OnTextureSelectorRowChanged();
+
+	// Open catch double click event to reveal the file in the browser
+	void                         OnTextureSelectorItemDoubleClicked(QListWidgetItem* pItem);
+
 	void                         OnCompressionTypeIndexChanged();
 private:
 
+	// A checkerboard texture, will be rendered to clear the texture preview screen, not using a color 
+	// because we want to be able display the alpha
+	Texture*                     mCheckerboardTexture;
 
 	// The list of textures
 	std::vector<TextureEntry*>   mTextureList;

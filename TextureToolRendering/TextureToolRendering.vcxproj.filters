@@ -177,6 +177,9 @@
     <ClInclude Include="Src\TextureConverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TexturePreviewConstantBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TextureToolRendering.rc" />
@@ -186,6 +189,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\TexturePreviewVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\TexturePreviewNormalMapPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

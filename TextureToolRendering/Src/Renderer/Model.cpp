@@ -1,12 +1,11 @@
 #include "TT_PCH.h"
-#include "Model.h"
-
 
 Model::Model()
 {
 	mMaterial.SetPixelShader(ShaderManager::LoadShader(L"TexturePreviewPS"));
 	mMaterial.SetVertexShader(ShaderManager::LoadShader(L"TexturePreviewVS"));
 	mMaterial.SetupInputLayout();
+	mMaterial.CreatePreviewInfoBuffer();
 	LoadPlaneVertices();
 }
 
@@ -69,7 +68,9 @@ HRESULT Model::LoadPlaneVertices()
 	return result;
 }
 
-Material::Material():
+// TexturePreviewMaterial Implementation
+
+TexturePreviewMaterial::TexturePreviewMaterial():
 	mVertexShader(nullptr),
 	mPixelShader(nullptr),
 	mInputLayout(nullptr)
@@ -77,7 +78,7 @@ Material::Material():
 
 }
 
-Material::~Material()
+TexturePreviewMaterial::~TexturePreviewMaterial()
 {
 	if (mVertexShader != nullptr)
 	{
@@ -90,9 +91,10 @@ Material::~Material()
 	}
 
 	SAFE_RELEASE(mInputLayout);
+	SAFE_RELEASE(mTexturePreviewInfoBuffer);
 }
 
-void Material::SetupInputLayout()
+void TexturePreviewMaterial::SetupInputLayout()
 {
 	// Create the input layout for the vertex shader.
 	D3D11_INPUT_ELEMENT_DESC vertexLayoutDesc[] =
@@ -110,3 +112,30 @@ void Material::SetupInputLayout()
 		ShowError(result, "DXDevice::GetDevice()->CreateInputLayout");
 	}
 }
+
+void TexturePreviewMaterial::SetTexturePreviewInfo(const TexturePreviewInfo& pTexturePreviewInfo)
+{
+	mTexturePreviewInfo = pTexturePreviewInfo;
+	DXDevice::GetContext()->UpdateSubresource(mTexturePreviewInfoBuffer, 0, nullptr, &mTexturePreviewInfo, 0, 0);
+}
+
+void TexturePreviewMaterial::CreatePreviewInfoBuffer()
+{
+	// Create the constant buffers for the variables defined in the vertex shader.
+	D3D11_BUFFER_DESC constantBufferDesc;
+	ZeroMemory(&constantBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constantBufferDesc.ByteWidth = sizeof(TexturePreviewInfo);
+	constantBufferDesc.CPUAccessFlags = 0;
+	constantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	HRESULT result = DXDevice::GetDevice()->CreateBuffer(&constantBufferDesc, nullptr, &mTexturePreviewInfoBuffer);
+	if FAILED(result)
+	{
+		ShowError(result, "DXDevice::GetDevice()->CreateBuffer");
+	}
+	TexturePreviewInfo previewInfo;
+	previewInfo.forceMip = -1;
+	SetTexturePreviewInfo(previewInfo);
+}
+

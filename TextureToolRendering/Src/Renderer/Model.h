@@ -8,11 +8,19 @@ struct Vertex
 	DirectX::XMFLOAT2 TexCoord;
 };
 
-class Material
+struct TexturePreviewInfo
+{
+	int forceMip;
+	int stride1;
+	int stride2;
+	int stride3;
+};
+
+class TexturePreviewMaterial
 {
 public:
-	Material();
-	~Material();
+	TexturePreviewMaterial();
+	~TexturePreviewMaterial();
 
 	// Create the input layout for the vertex shader.
 	void                      SetupInputLayout();
@@ -28,7 +36,18 @@ public:
 	void                      SetInputLayout(ID3D11InputLayout* pLayout) { mInputLayout= pLayout; }
 	const ID3D11InputLayout*  GetInputLayout() const { return mInputLayout; }
 
+	void					  SetTexturePreviewInfo(const TexturePreviewInfo& pTexturePreviewInfo);
+	TexturePreviewInfo		  GetTexturePreviewInfo() { return mTexturePreviewInfo;}
+
+	void					  CreatePreviewInfoBuffer();
+
+	const ID3D11Buffer*       GetTexturePreviewInfoBuffer() const { return mTexturePreviewInfoBuffer; }
+
 private:
+	// This struct will be sent to the shader as constant buffer
+	TexturePreviewInfo		  mTexturePreviewInfo;
+	// The buffer of the previewinfo
+	ID3D11Buffer*             mTexturePreviewInfoBuffer;
 	// The vertex shader
 	Shader*                   mVertexShader;
 	// The pixel shader
@@ -43,17 +62,18 @@ public:
 	Model();
 	~Model();
 
-	void                      Render();
+	void                           Render();
 
-	HRESULT                   LoadPlaneVertices();
+	HRESULT                        LoadPlaneVertices();
 
-	ID3D11Buffer*             GetVertexBuffer() { return mVertexBuffer; }
+	ID3D11Buffer*                  GetVertexBuffer() { return mVertexBuffer; }
 
-	const Material*           GetMaterial() { return &mMaterial;}
+	const TexturePreviewMaterial*  GetMaterial() { return &mMaterial;}
 
 private:
 // The vertex buffer
-	ID3D11Buffer*             mVertexBuffer;
-	Material                  mMaterial;
+	ID3D11Buffer*                  mVertexBuffer;
+// The material
+	TexturePreviewMaterial         mMaterial;
 };
 

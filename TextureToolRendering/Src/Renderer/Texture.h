@@ -22,6 +22,7 @@ public:
 	void                                AddSurface(Surface* pSurface) { mSurfaceList.push_back(pSurface); }
 	const Surface*                      GetSurface(int pIndex) const { return mSurfaceList[pIndex]; }
 
+	Surface*                            GetFirstSurface() { return mSurfaceList[0]; }
 	const Surface*                      GetFirstSurface() const { return mSurfaceList[0]; }
 
 	void                                SetFileName(const char* pFileName) { mFileName = pFileName; }

@@ -2,13 +2,15 @@
 #pragma hdrstop
 #include "RenderView.h"
 
-RenderView::RenderView(QWidget* pWidget) : QWidget::QWidget(pWidget)
+RenderView::RenderView(QWidget* pWidget) : 
+	QWidget::QWidget(pWidget), 
+	mRenderTargetView(nullptr),
+	mRasterizerState(nullptr),
+	mSwapChain(nullptr),
+	mBlendState(nullptr)
 {
 	setLayout(new QVBoxLayout(this));
 	layout()->addWidget(new QComboBox(this));
-    mRenderTargetView   = nullptr;
-    mRasterizerState    = nullptr;
-	mSwapChain = nullptr;
 
 // Disable updates, because updates would clear the screen automatically
 	setUpdatesEnabled(false);
@@ -21,25 +23,31 @@ RenderView::~RenderView()
 	SAFE_RELEASE(mRasterizerState);
 	SAFE_RELEASE(mSwapChain);
 	SAFE_RELEASE(mSamplerState);
+	SAFE_RELEASE(mBlendState);
 }
 
 void RenderView::Render2DTexture(const Texture* pTexture)
 {
 	Model model;
 
-	const Material* material = model.GetMaterial();
+	const TexturePreviewMaterial* material = model.GetMaterial();
 
-	ID3D11DeviceContext* Context = DXDevice::GetContext();
+	ID3D11DeviceContext* context = DXDevice::GetContext();
 
 	const UINT vertexStride = sizeof(Vertex);
 	const UINT offset = 0;
 
 
 	ID3D11VertexShader* vertexShader = (ID3D11VertexShader*)material->GetVertexShader()->GetShader();
-	Context->VSSetShader(vertexShader, nullptr, 0);
+	context->VSSetShader(vertexShader, nullptr, 0);
 
 	ID3D11PixelShader* pixelShader = (ID3D11PixelShader*)material->GetPixelShader()->GetShader();
-	Context->PSSetShader(pixelShader, nullptr, 0);
+	context->PSSetShader(pixelShader, nullptr, 0);
+
+
+	ID3D11Buffer* texturePreviewBuffer = (ID3D11Buffer*)material->GetTexturePreviewInfoBuffer();
+
+	context->PSSetConstantBuffers(0, 1, &texturePreviewBuffer);
 
 	// Set the viewport
 	D3D11_VIEWPORT viewport;
@@ -50,23 +58,25 @@ void RenderView::Render2DTexture(const Texture* pTexture)
 	viewport.Width = width();
 	viewport.Height = height();
 
-	Context->RSSetState(GetRasterizerState());
-	Context->RSSetViewports(1, &viewport);
+	context->RSSetState(GetRasterizerState());
+	context->RSSetViewports(1, &viewport);
 
 
 	ID3D11Buffer* vertexBuffer = model.GetVertexBuffer();
-	Context->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexStride, &offset);
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	Context->IASetInputLayout((ID3D11InputLayout*)material->GetInputLayout());
+	context->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexStride, &offset);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetInputLayout((ID3D11InputLayout*)material->GetInputLayout());
 
 	ID3D11ShaderResourceView* shaderResourceView = (ID3D11ShaderResourceView*)pTexture->GetResourceView();
-	Context->PSSetShaderResources(0, 1, &shaderResourceView);
-	Context->VSSetShaderResources(0, 1, &shaderResourceView);
 
+	context->PSSetShaderResources(0, 1, &shaderResourceView);
+	context->VSSetShaderResources(0, 1, &shaderResourceView);
 
-	Context->OMSetRenderTargets(1, &mRenderTargetView, nullptr);
+	context->OMSetBlendState(mBlendState, nullptr, 0xffffff);
 
-	Context->Draw(6, 0);
+	context->OMSetRenderTargets(1, &mRenderTargetView, nullptr);
+
+	context->Draw(6, 0);
 }
 
 void RenderView::OnResized()
@@ -202,7 +212,7 @@ HRESULT RenderView::Initialize()
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MipLODBias = 0;
 	samplerDesc.MaxAnisotropy = 1;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	samplerDesc.BorderColor[0] = 1.0f;
@@ -213,7 +223,25 @@ HRESULT RenderView::Initialize()
 	samplerDesc.MaxLOD = FLT_MAX;
 
 	result = DXDevice::GetDevice()->CreateSamplerState(&samplerDesc, &mSamplerState);
+	if FAILED(result)
+		return result;
 	DXDevice::GetContext()->PSSetSamplers(0, 1, &mSamplerState);
+
+	// Setup blending state, to make sure we're able to render alpha
+	D3D11_BLEND_DESC blendState;
+	ZeroMemory(&blendState, sizeof(D3D11_BLEND_DESC));
+	blendState.AlphaToCoverageEnable = 0;
+	blendState.IndependentBlendEnable = 0;
+	blendState.RenderTarget[0].BlendEnable = 1;
+	blendState.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendState.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	result = DXDevice::GetDevice()->CreateBlendState(&blendState, &mBlendState);
 
 	return result;
 }
