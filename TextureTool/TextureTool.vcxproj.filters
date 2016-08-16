@@ -182,9 +182,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="TextureToolRendering.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="Src\Shaders\TexturePreviewVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>

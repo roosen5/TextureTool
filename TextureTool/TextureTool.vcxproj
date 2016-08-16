@@ -305,9 +305,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="TextureToolRendering.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="Src\Shaders\TexturePreviewNormalMapPS.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
