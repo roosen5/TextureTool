@@ -61,7 +61,7 @@ float4 main(PixelShaderInput IN) : SV_TARGET
 	color.b = sqrt(1 - saturate(dot(color.rg, color.rg)));
 	color.a = 1;
 
-	if (renderChannels != 0xFFFFFFFF)
+	if (renderChannels != (int)0xFFFFFFFF)
 	{
 		color = DoMask(color, renderChannels);
 

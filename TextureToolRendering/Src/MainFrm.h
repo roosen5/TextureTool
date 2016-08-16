@@ -2,7 +2,7 @@
 #define TEXTURETOOLRENDERING_H
 
 #include <QtWidgets/QMainWindow>
-#include "ui_TextureToolRendering.h"
+#include "ui_MainFrm.h"
 
 FORWARD_DECLARE_CLASS(RenderView);
 
@@ -26,7 +26,7 @@ private slots:
 	void                            Update();
 
 private:
-	Ui::TextureToolRenderingClass   mUi;
+	Ui::MainFrm                     mUi;
 
 protected:
 

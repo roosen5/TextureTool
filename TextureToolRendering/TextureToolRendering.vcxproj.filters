@@ -47,9 +47,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\qrc_TextureToolRendering.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\TT_PCH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -107,14 +104,11 @@
     <ClCompile Include="Src\QTUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_TextureTool.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="TextureToolRendering.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="TextureToolRendering.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Src\MainFrm.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
@@ -127,11 +121,14 @@
     <CustomBuild Include="Src\Widgets\RenderView.h">
       <Filter>Source Files\Widgets</Filter>
     </CustomBuild>
+    <CustomBuild Include="MainFrm.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="TextureTool.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_TextureToolRendering.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="Src\global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -180,6 +177,9 @@
     <ClInclude Include="Src\QTUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_MainFrm.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TextureToolRendering.rc" />
@@ -194,5 +194,13 @@
     <FxCompile Include="Src\Shaders\TexturePreviewDiffusePS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\Icons\cobblestonesDiffuse.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Icons\cobblestonesNormal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

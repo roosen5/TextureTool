@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TextureToolRenderingClass</class>
- <widget class="QMainWindow" name="TextureToolRenderingClass">
+ <class>MainFrm</class>
+ <widget class="QMainWindow" name="MainFrm">
   <property name="geometry">
    <rect>
     <x>0</x>

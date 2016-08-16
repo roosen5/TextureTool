@@ -58,7 +58,7 @@ float4 main( PixelShaderInput IN ) : SV_TARGET
 		color = Texture.SampleLevel(Sampler, IN.TexCoord, forceMip);
 	}
 
-	if (renderChannels != 0xFFFFFFFF)
+	if (renderChannels != (int)0xFFFFFFFF)
 	{
 		color = DoMask(color, renderChannels);
 
