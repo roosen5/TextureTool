@@ -3,10 +3,11 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	MainFrm w;
-	w.show();
-	int returnValue = a.exec();
+	QApplication application(argc, argv);
+	MainFrm mainFrm;
+	mainFrm.show();
+	mainFrm.GetTextureResourceEditor()->RenderPreviewImage();
+	int returnValue = application.exec();
 	DXDevice::ShutDown();
 	return returnValue ;
 }

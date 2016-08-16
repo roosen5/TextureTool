@@ -1,4 +1,6 @@
 <RCC>
-    <qresource prefix="TextureToolRendering">
+    <qresource prefix="/TextureToolRendering">
+        <file alias="DiffuseIcon">Resources/Icons/cobblestonesDiffuse.jpg</file>
+        <file alias="NormalMapIcon">Resources/Icons/cobblestonesNormal.jpg</file>
     </qresource>
 </RCC>

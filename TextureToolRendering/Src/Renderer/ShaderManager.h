@@ -1,6 +1,10 @@
 #pragma once
 FORWARD_DECLARE_CLASS(Shader);
 
+#define VSTEXTUREPREVIEWSHADERNAME              L"TexturePreviewVS"
+#define PSTEXTUREPREVIEWSHADERNAME_DIFFUSE	    L"TexturePreviewDiffusePS"
+#define PSTEXTUREPREVIEWSHADERNAME_NORMALMAP	L"TexturePreviewNormalMapPS"
+
 enum ShaderType 
 {
 	stNone,

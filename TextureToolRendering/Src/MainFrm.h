@@ -14,17 +14,26 @@ class MainFrm : public QMainWindow
 public:
 	MainFrm(QWidget *parent = 0);
 	~MainFrm();
-	RenderView* GetRenderInterface() { return mRenderInterface; }
+
+	TextureResourceEditor*          GetTextureResourceEditor() { return mTextureResourceEditor; }
+
+	QMenuBar*                       GetMenuBar() { return mUi.mMenuBar; }
+
+	QToolBar*                       GetToolBar(){ return mUi.mToolBar; };
+
+
 private slots:
-	void Update();
+	void                            Update();
 
 private:
-	Ui::TextureToolRenderingClass mUi;
-	RenderView* mRenderInterface;
+	Ui::TextureToolRenderingClass   mUi;
+
 protected:
 
-	virtual void resizeEvent(QResizeEvent *event) override;
+	virtual void                    resizeEvent(QResizeEvent *event) override;
 
+	// The texture editor
+	TextureResourceEditor*          mTextureResourceEditor;
 };
 
 #endif // TEXTURETOOLRENDERING_H

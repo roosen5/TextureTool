@@ -11,6 +11,8 @@ public:
 
 	void              Assign(const Surface* pSurface);
 
+	bool              IsValid() { return mData != nullptr; }
+
 	void              LoadFromFile(const char* pFileName);
 
 	unsigned int      GetWidth() const { return mWidth; }

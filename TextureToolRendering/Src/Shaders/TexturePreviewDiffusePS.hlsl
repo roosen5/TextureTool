@@ -20,11 +20,11 @@ struct PixelShaderInput
 
 int ToFixedPoint(float4 pColor)
 {
-	int red = (int)(min(1.0f, pColor.x) * 255.0f);
+	int red   = (int)(min(1.0f, pColor.x) * 255.0f);
 	int green = (int)(min(1.0f, pColor.y) * 255.0f);
-	int blue = (int)(min(1.0f, pColor.z) * 255.0f);
+	int blue  = (int)(min(1.0f, pColor.z) * 255.0f);
 	int alpha = (int)(min(1.0f, pColor.w) * 255.0f);
-	return (red << 24) + (green << 16) + (blue << 8) + alpha;
+	return (red << 24) + (green << 16) + (blue<<8) + alpha;
 };
 
 float4 ToRGBA(int pFixedPoint)
@@ -33,7 +33,7 @@ float4 ToRGBA(int pFixedPoint)
 	retVal.x = ((pFixedPoint >> 24) & 0xff) / 255.0f;
 	retVal.y = ((pFixedPoint >> 16) & 0xff) / 255.0f;
 	retVal.z = ((pFixedPoint >> 8) & 0xff) / 255.0f;
-	retVal.w = ((pFixedPoint) & 0xff) / 255.0f;
+	retVal.w = ((pFixedPoint ) & 0xff) / 255.0f;
 	return retVal;
 };
 
@@ -44,9 +44,9 @@ float4 DoMask(float4 pColor, int pChannel)
 	return ToRGBA(colorFixedPoint);
 }
 
-float4 main(PixelShaderInput IN) : SV_TARGET
+float4 main( PixelShaderInput IN ) : SV_TARGET
 {
-	float4 color = float4(0,0,0,0);
+	float4 color=float4(0,0,0,0);
 	if (forceMip == -1)
 	{
 		// Sample default
@@ -58,9 +58,6 @@ float4 main(PixelShaderInput IN) : SV_TARGET
 		color = Texture.SampleLevel(Sampler, IN.TexCoord, forceMip);
 	}
 
-	color.b = sqrt(1 - saturate(dot(color.rg, color.rg)));
-	color.a = 1;
-
 	if (renderChannels != 0xFFFFFFFF)
 	{
 		color = DoMask(color, renderChannels);
@@ -68,7 +65,7 @@ float4 main(PixelShaderInput IN) : SV_TARGET
 		if (normalize)
 		{
 			// To turn it white, used to preview single colors as white
-			color = float4(length(color).xxx, 1.0f);
+			color = float4(length(color).xxx, 1.0f); 
 		}
 
 		// If the render channels does not include the alpha, force it to 1

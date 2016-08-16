@@ -2,7 +2,9 @@
 
 TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 	: QWidget(parent),
-	  mCheckerboardTexture(nullptr)
+	  mCheckerboardTexture(nullptr),
+	  mRenderDiffuseAction(nullptr),
+	  mRenderNormalMapAction(nullptr)
 {
 	mUi.setupUi(this);
 
@@ -26,11 +28,15 @@ TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 
 	UpdateTextureInfo();
 
+	UpdateRenderPreviewTypeCB();
 
-	connect(mUi.mTextureSelector,   SIGNAL(currentRowChanged(int)), SLOT(OnTextureSelectorRowChanged()));
-	connect(mUi.mTextureSelector,   SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem* )));
-	connect(mUi.mCompressionTypeCB, SIGNAL(currentIndexChanged(int)), SLOT(OnCompressionTypeIndexChanged()));
-	connect(mUi.mConvertBtn, SIGNAL(pressed()), SLOT(OnTextureSelectorRowChanged()));
+
+	connect(mUi.mTextureSelector,		SIGNAL(currentRowChanged(int)),              SLOT(OnTextureSelectorRowChanged()));
+	connect(mUi.mTextureSelector,   	SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem* )));
+	connect(mUi.mCompressionTypeCB, 	SIGNAL(currentIndexChanged(int)),            SLOT(OnCompressionTypeIndexChanged()));
+	connect(mUi.mConvertBtn,        	SIGNAL(pressed()),                           SLOT(OnConvertBtnPressed()));
+	connect(mUi.mPreviewMipmapCB,   	SIGNAL(currentIndexChanged(int)),            SLOT(OnPreviewMipmapCBIndexChanged()));
+	connect(mUi.mRenderPreviewTypeCB,   SIGNAL(currentIndexChanged(int)),            SLOT(OnRenderPreviewTypeCBIndexChanged()));
 }
 
 TextureResourceEditor::~TextureResourceEditor()
@@ -43,10 +49,39 @@ TextureResourceEditor::~TextureResourceEditor()
 	SAFE_DELETE(mCheckerboardTexture);
 }
 
+void TextureResourceEditor::Setup(MainFrm* pMainFrm)
+{
+	mMainFrm = pMainFrm;
+
+	mRenderDiffuseAction = new QAction(this);
+	mRenderDiffuseAction->setText("Render with diffuse shader");
+	mRenderDiffuseAction->setIcon(QIcon(":/TextureToolRendering/DiffuseIcon"));
+	mRenderDiffuseAction->setCheckable(true);
+
+	QMenuBar* menuBar = mMainFrm->GetMenuBar();
+	mRenderingMenu = menuBar->addMenu("Rendering");
+
+
+	mRenderNormalMapAction = new QAction(this);
+	mRenderNormalMapAction->setText("Render with normal map shader");
+	mRenderNormalMapAction->setIcon(QIcon(":/TextureToolRendering/NormalMapIcon"));
+	mRenderNormalMapAction->setCheckable(true);
+
+
+	QToolBar* toolBar = mMainFrm->GetToolBar();
+
+	connect(mRenderDiffuseAction,       SIGNAL(triggered()), SLOT(RenderDiffuseActionTriggered()));
+	connect(mRenderNormalMapAction,     SIGNAL(triggered()), SLOT(RenderNormalMapActionTriggered()));
+
+	UpdateRenderingMenu();
+}
+
 void TextureResourceEditor::UpdateTextureSelector()
 {
+	// Make sure signals don't get trigged while clearing/adding items
 	mUi.mTextureSelector->blockSignals(true);
 	mUi.mTextureSelector->clear();
+
 	for (int i = 0; i < mTextureList.size(); i++)
 	{
 		QListWidgetItem* Item = new QListWidgetItem();
@@ -66,6 +101,46 @@ void TextureResourceEditor::UpdateTextureSelector()
 	mUi.mTextureSelector->blockSignals(false);
 }
 
+void TextureResourceEditor::UpdateMipmapCB()
+{
+	// Make sure signals don't get trigged while clearing/adding items
+	mUi.mPreviewMipmapCB->blockSignals(true);
+
+	// To go back to that index after refreshing
+	int indexBuffer = mUi.mPreviewMipmapCB->currentIndex();
+	if (indexBuffer < 0)
+		indexBuffer = 0;
+	mUi.mPreviewMipmapCB->clear();
+	Texture* texture=  GetPreviewingTexture();
+	mUi.mPreviewMipmapCB->addItem("(auto)");
+	for (int i = 0; i < texture->GetSurfaceCount(); i++)
+	{
+		QString itemText("mip %1");
+		itemText=itemText.arg(i);
+		mUi.mPreviewMipmapCB->addItem(itemText);
+	}
+
+	// If the index is higher than the amount of mipmaps, clamp it to last mipmap
+	indexBuffer = min(indexBuffer, mUi.mPreviewMipmapCB->count() - 1);
+
+	mUi.mPreviewMipmapCB->setCurrentIndex(indexBuffer);
+	mUi.mPreviewMipmapCB->blockSignals(false);
+}
+
+void TextureResourceEditor::RenderDiffuseActionTriggered()
+{
+	mUi.mTexturePreviewRV->SetCurrentPixelShader(PSTEXTUREPREVIEWSHADERNAME_DIFFUSE);
+	UpdateRenderingMenu();
+	RenderPreviewImage();
+}
+
+void TextureResourceEditor::RenderNormalMapActionTriggered()
+{
+	mUi.mTexturePreviewRV->SetCurrentPixelShader(PSTEXTUREPREVIEWSHADERNAME_NORMALMAP);
+	UpdateRenderingMenu();
+	RenderPreviewImage();
+}
+
 void TextureResourceEditor::OnTextureSelectorRowChanged()
 {
 	 //If the currentrow is -1, it means that nothing is selected, so return
@@ -78,6 +153,43 @@ void TextureResourceEditor::OnTextureSelectorRowChanged()
 	RenderPreviewImage();
 	UpdateTextureInfo();
 	SetSupportedTextureCBToFormat(texture->GetFormat());
+	UpdateMipmapCB();
+	// Set the mipmap back to (auto)
+	mUi.mTexturePreviewRV->SetForcedMipmap(MIPMAP_AUTO);
+}
+
+void TextureResourceEditor::OnPreviewMipmapCBIndexChanged()
+{
+	// (auto) has to be -1, and it's the first entry so subtract one 
+	int mipmap = mUi.mPreviewMipmapCB->currentIndex() - 1;
+	// If the current index is -1, it means that none is selected, so force (auto)
+	if (mUi.mPreviewMipmapCB->currentIndex() == -1)
+	{
+		mipmap = MIPMAP_AUTO;
+	}
+	mUi.mTexturePreviewRV->SetForcedMipmap(mipmap);
+	RenderPreviewImage();
+	UpdateTextureInfo();
+}
+
+void TextureResourceEditor::OnConvertBtnPressed()
+{
+	// If the currentrow is -1, it means that nothing is selected, so return
+	if (mUi.mTextureSelector->currentRow() == -1)
+	{
+		return;
+	}
+	TextureEntry* textureEntry = mTextureList[mUi.mTextureSelector->currentRow()];
+
+	DXGI_FORMAT cbFormat = mUi.mCompressionTypeCB->currentData().value<DXGI_FORMAT>();
+	ConvertTexture(cbFormat, textureEntry);
+}
+
+void TextureResourceEditor::OnRenderPreviewTypeCBIndexChanged()
+{
+	int channels = mUi.mRenderPreviewTypeCB->currentData().value<int>();
+	mUi.mTexturePreviewRV->SetRenderChannels(channels);
+	RenderPreviewImage();
 }
 
 void TextureResourceEditor::OnTextureSelectorItemDoubleClicked(QListWidgetItem* pItem)
@@ -89,8 +201,31 @@ void TextureResourceEditor::OnTextureSelectorItemDoubleClicked(QListWidgetItem* 
 
 void TextureResourceEditor::OnCompressionTypeIndexChanged()
 {
+	// If the currentrow is -1, it means that nothing is selected, so return
+	if (mUi.mTextureSelector->currentRow() == -1)
+	{
+		return;
+	}
+	TextureEntry* textureEntry = mTextureList[mUi.mTextureSelector->currentRow()];
+
 	DXGI_FORMAT cbFormat = mUi.mCompressionTypeCB->currentData().value<DXGI_FORMAT>();
-	ConvertTexture(cbFormat);
+	ConvertTexture(cbFormat, textureEntry);
+}
+
+void TextureResourceEditor::UpdateRenderingMenu()
+{
+	mRenderingMenu->clear();
+	const Shader* currentPixelShader = mTexturePreviewRV->GetCurrentPixelShader();
+
+	mRenderDiffuseAction->setChecked(currentPixelShader->GetShaderName().compare(PSTEXTUREPREVIEWSHADERNAME_DIFFUSE) == 0);
+	mRenderingMenu->addAction(mRenderDiffuseAction);
+
+	mRenderNormalMapAction->setChecked(currentPixelShader->GetShaderName().compare(PSTEXTUREPREVIEWSHADERNAME_NORMALMAP) == 0);
+	mRenderingMenu->addAction(mRenderNormalMapAction);
+
+	mMainFrm->GetToolBar()->addAction(mRenderDiffuseAction);
+
+	mMainFrm->GetToolBar()->addAction(mRenderNormalMapAction);
 }
 
 void TextureResourceEditor::dragLeaveEvent(QDragLeaveEvent* pEvent)
@@ -110,6 +245,12 @@ void TextureResourceEditor::dropEvent(QDropEvent* pEvent)
 		HRESULT result = LoadTexture(path.toLatin1().data(), texture);
 		if FAILED(result)
 		{
+			if (result == E_READINGFILEFAILED)
+			{
+				QMessageBox msgBox;
+				msgBox.critical(this, "Loading file failed", "Error loading image");
+			}
+			else
 			if (result != E_UNSUPPORTEDFILE) // Don't report unsupported file errors 
 			{
 				ShowError(result, "ImportTexture");
@@ -132,6 +273,7 @@ void TextureResourceEditor::SetPreviewTexture(Texture* pPreviewTexture)
 		// Look through all the items in the list and set it to that index if it matches the parameter texture
 		if (textureEntry->originalTexture == pPreviewTexture || textureEntry->convertedTexture == pPreviewTexture)
 		{
+			// Make sure signals don't get trigged selecting the row
 			mUi.mTextureSelector->blockSignals(true);
 			mUi.mTextureSelector->setCurrentRow(i);
 			mUi.mTextureSelector->blockSignals(false);
@@ -161,6 +303,10 @@ HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pOut
 
 	// Load surface
 	Surface* surface = new Surface(pFileName);
+	if (!surface->IsValid())
+	{
+		return E_READINGFILEFAILED;
+	}
 
 	// Create texture
 	D3D11_TEXTURE2D_DESC textureDesc;
@@ -187,9 +333,11 @@ HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pOut
 	{
 		return result;
 	}
+
 	pOutTexture->Set2DTexture(dx2DTexture);
 	pOutTexture->SetFileName(pFileName);
 
+	// Create the subresourceview
 	ID3D11ShaderResourceView* surfaceResourceView;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -209,29 +357,39 @@ HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pOut
 	return result;
 }
 
+void TextureResourceEditor::UpdateRenderPreviewTypeCB()
+{
+	mUi.mRenderPreviewTypeCB->addItem("RGBA(Blended)", QVariant::fromValue<int>(0xFFFFFFFF));
+	mUi.mRenderPreviewTypeCB->addItem("RGB",		   QVariant::fromValue<int>(0xFFFFFF00));
+
+	mUi.mRenderPreviewTypeCB->addItem("Red",		   QVariant::fromValue<int>(0xFF000000));
+	mUi.mRenderPreviewTypeCB->addItem("Green",		   QVariant::fromValue<int>(0x00FF0000));
+	mUi.mRenderPreviewTypeCB->addItem("Blue",		   QVariant::fromValue<int>(0x0000FF00));
+	mUi.mRenderPreviewTypeCB->addItem("Alpha",		   QVariant::fromValue<int>(0x000000FF));
+
+	mUi.mRenderPreviewTypeCB->addItem("Normal map",	   QVariant::fromValue<int>(0x000000FF));
+}
+
 void TextureResourceEditor::SetupSupportedTextureFormats()
 {
 	AddSupportedTextureFormat(DXGI_FORMAT_R8G8B8A8_UNORM, "RGBA (32 Bit)");
-	AddSupportedTextureFormat(DXGI_FORMAT_BC1_UNORM, "DXT1/BC1");
-	AddSupportedTextureFormat(DXGI_FORMAT_BC2_UNORM, "DXT3/BC2");
-	AddSupportedTextureFormat(DXGI_FORMAT_BC3_UNORM, "DXT5/BC3"); 
-	AddSupportedTextureFormat(DXGI_FORMAT_BC5_UNORM, "BC5"); 
+	AddSupportedTextureFormat(DXGI_FORMAT_BC1_UNORM,	  "DXT1/BC1");
+	AddSupportedTextureFormat(DXGI_FORMAT_BC2_UNORM, 	  "DXT3/BC2");
+	AddSupportedTextureFormat(DXGI_FORMAT_BC3_UNORM, 	  "DXT5/BC3"); 
+	AddSupportedTextureFormat(DXGI_FORMAT_BC5_UNORM, 	  "BC5"); 
+#ifdef ENABLEBC7 // Disabled by default because this compression method takes extremely long
+	AddSupportedTextureFormat(DXGI_FORMAT_BC7_UNORM, 	  "BC7(Slow)"); 
+#endif
 }
 
-void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat)
+void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat, TextureEntry* pTextureEntry)
 {
-	// If the currentrow is -1, it means that nothing is selected, so return
-	if (mUi.mTextureSelector->currentRow() == -1)
-	{
-		return;
-	}
-
-	SAFE_DELETE(mTextureList[mUi.mTextureSelector->currentRow()]->convertedTexture);
-	Texture* originalTexture = mTextureList[mUi.mTextureSelector->currentRow()]->originalTexture;
+	SAFE_DELETE(pTextureEntry->convertedTexture);
+	Texture* originalTexture = pTextureEntry->originalTexture;
 	assert(originalTexture != nullptr);
 	TextureConverter converter;
 	converter.SetOriginalTexture(originalTexture);
-	converter.SetGenerateMipmaps(mUi.mGenerateMipmapsCB->isChecked());
+	converter.SetGenerateMipmaps(mUi.mGenerateMipmapsCheckbox->isChecked());
 	converter.SetDstFormat(pFormat);
 	Texture* convertedTexture = nullptr;
 	HRESULT result = converter.Process(convertedTexture);
@@ -239,9 +397,10 @@ void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat)
 	{
 		ShowError(result, "converter.Convert(convertedTexture)");
 	}
-	mTextureList[mUi.mTextureSelector->currentRow()]->convertedTexture = convertedTexture;
+	pTextureEntry->convertedTexture = convertedTexture;
 	RenderPreviewImage();
 	UpdateTextureInfo();
+	UpdateMipmapCB();
 }
 
 void TextureResourceEditor::AddSupportedTextureFormat(DXGI_FORMAT pFormat, const QString& pFormatName)
@@ -259,6 +418,7 @@ void TextureResourceEditor::SetSupportedTextureCBToFormat(DXGI_FORMAT pFormat)
 		DXGI_FORMAT cbFormat = mUi.mCompressionTypeCB->itemData(i).value<DXGI_FORMAT>();
 		if (cbFormat == pFormat)
 		{
+			// Make sure signals don't get trigged selecting the row
 			mUi.mCompressionTypeCB->blockSignals(true);
 			mUi.mCompressionTypeCB->setCurrentIndex(i);
 			mUi.mCompressionTypeCB->blockSignals(false);
@@ -271,8 +431,15 @@ void TextureResourceEditor::UpdateTextureInfo()
 	Texture* texture = GetPreviewingTexture();
 	if (texture == nullptr)
 		return;
-	DXGI_FORMAT DEBUG_Format =  texture->GetFirstSurface()->GetFormat();
-	QString text = QString("Width: %1, Height: %2\nBytes: %3").arg(texture->GetWidth()).arg(texture->GetHeight()).arg(texture->GetFirstSurface()->GetDepthPitch());
+	int forceMipmap = mUi.mTexturePreviewRV->GetForcedMipmap();
+	// If the forceMipmap is set to -1 (AKA MIPMAP_AUTO), set it to zero
+	forceMipmap = min(max(0, forceMipmap), texture->GetSurfaceCount() - 1);
+
+	QString text = QString("Width: %1, Height: %2\nMipsize: %3\nMipmap count: %4")
+																				.arg(texture->GetSurface(forceMipmap)->GetWidth())
+																				.arg(texture->GetSurface(forceMipmap)->GetHeight())
+																				.arg(texture->GetSurface(forceMipmap)->GetDepthPitch())
+																				.arg(texture->GetSurfaceCount());
 	mUi.mPreviewTextureInfo->setText(text);
 }
 
@@ -306,9 +473,20 @@ void TextureResourceEditor::RenderPreviewImage()
 	Texture* previewTexture = GetPreviewingTexture();
 	if (previewTexture == nullptr)
 		return;
-	// Clear the screen with the alpha checkerboard texture
+
+	// Clear the screen with the alpha checkerboard texture,
+	// Make sure we render it with all the channels, 
+	// Copying the current channels in this buffer
+	int renderChannelsBuffer = mTexturePreviewRV->GetRenderChannels();
+
+	mTexturePreviewRV->SetRenderChannels(0xFFFFFFFF);
 	mTexturePreviewRV->Render2DTexture(mCheckerboardTexture);
+	mTexturePreviewRV->SetRenderChannels(renderChannelsBuffer);
+
+	// Render the preview texture
 	mTexturePreviewRV->Render2DTexture(previewTexture);
+
+	// Blit result to the screen
 	mTexturePreviewRV->Blit();
 }
 

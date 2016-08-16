@@ -1,11 +1,13 @@
 #include "TT_PCH.h"
 
-Surface::Surface()
+Surface::Surface():
+	mData(nullptr)
 {
 	Setup(0, 0, 0, 0);
 }
 
-Surface::Surface(const char* pFileName)
+Surface::Surface(const char* pFileName):
+	mData(nullptr)
 {
 	LoadFromFile(pFileName);
 }
@@ -43,6 +45,8 @@ void Surface::LoadFromFile(const char* pFileName)
 {
 	QImage image;
 	image.load(pFileName);
+	if (image.isNull())
+		return;
 	// Just convert 1 channel images to 3 channel
 	if (image.allGray())
 	{

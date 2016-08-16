@@ -44,7 +44,7 @@ HRESULT TextureConverter::Compress(DXGI_FORMAT pFormat, SurfaceList& pSurfaceLis
 		if (pFormat == DXGI_FORMAT_BC5_UNORM||pFormat == DXGI_FORMAT_BC5_SNORM)
 		{
 			// If its supposed to be used as a normal map, generating the third/green axis
-			// The magnitude of RGB should be 1 
+			// The magnitude of RGB should be 1, this is to make sure its normalized 
 			surface->NormalizeColors();
 		}
 

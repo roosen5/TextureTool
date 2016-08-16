@@ -2,10 +2,14 @@
 
 Model::Model()
 {
-	mMaterial.SetPixelShader(ShaderManager::LoadShader(L"TexturePreviewPS"));
-	mMaterial.SetVertexShader(ShaderManager::LoadShader(L"TexturePreviewVS"));
+	// Set the pixel shader default to diffuse
+	mMaterial.SetPixelShader(ShaderManager::LoadShader(PSTEXTUREPREVIEWSHADERNAME_DIFFUSE));
+	mMaterial.SetVertexShader(ShaderManager::LoadShader(VSTEXTUREPREVIEWSHADERNAME));
+
+	// Create the layout and preview info buffer(Which is the same for every shader)
 	mMaterial.SetupInputLayout();
 	mMaterial.CreatePreviewInfoBuffer();
+
 	LoadPlaneVertices();
 }
 
@@ -13,10 +17,6 @@ Model::Model()
 Model::~Model()
 {
 	SAFE_RELEASE(mVertexBuffer);
-}
-
-void Model::Render()
-{
 }
 
 
@@ -80,15 +80,9 @@ TexturePreviewMaterial::TexturePreviewMaterial():
 
 TexturePreviewMaterial::~TexturePreviewMaterial()
 {
-	if (mVertexShader != nullptr)
-	{
-		ShaderManager::UnloadShader(mVertexShader->GetShaderName().c_str());
-	}
+	ReleaseVertexShader();
 
-	if (mPixelShader != nullptr)
-	{
-		ShaderManager::UnloadShader(mPixelShader->GetShaderName().c_str());
-	}
+	ReleasePixelShader();
 
 	SAFE_RELEASE(mInputLayout);
 	SAFE_RELEASE(mTexturePreviewInfoBuffer);
@@ -119,6 +113,22 @@ void TexturePreviewMaterial::SetTexturePreviewInfo(const TexturePreviewInfo& pTe
 	DXDevice::GetContext()->UpdateSubresource(mTexturePreviewInfoBuffer, 0, nullptr, &mTexturePreviewInfo, 0, 0);
 }
 
+void TexturePreviewMaterial::ReleaseVertexShader()
+{
+	if (mVertexShader != nullptr)
+	{
+		ShaderManager::UnloadShader(mVertexShader->GetShaderName().c_str());
+	}
+}
+
+void TexturePreviewMaterial::ReleasePixelShader()
+{
+	if (mPixelShader != nullptr)
+	{
+		ShaderManager::UnloadShader(mPixelShader->GetShaderName().c_str());
+	}
+}
+
 void TexturePreviewMaterial::CreatePreviewInfoBuffer()
 {
 	// Create the constant buffers for the variables defined in the vertex shader.
@@ -135,7 +145,8 @@ void TexturePreviewMaterial::CreatePreviewInfoBuffer()
 		ShowError(result, "DXDevice::GetDevice()->CreateBuffer");
 	}
 	TexturePreviewInfo previewInfo;
-	previewInfo.forceMip = -1;
+	// Set it to auto by default
+	previewInfo.mForceMip = MIPMAP_AUTO;
 	SetTexturePreviewInfo(previewInfo);
 }
 

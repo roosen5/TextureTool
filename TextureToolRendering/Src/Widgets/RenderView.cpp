@@ -4,11 +4,18 @@
 
 RenderView::RenderView(QWidget* pWidget) : 
 	QWidget::QWidget(pWidget), 
+	mTexturePreviewModel(nullptr),
 	mRenderTargetView(nullptr),
 	mRasterizerState(nullptr),
 	mSwapChain(nullptr),
-	mBlendState(nullptr)
+	mBlendState(nullptr),
+	mRenderChannels(0xFFFFFFFF),
+	mForcedMipmap(MIPMAP_AUTO),
+	mGrayScaleOutput(false)
 {
+	
+	mTexturePreviewModel = new Model();
+
 	setLayout(new QVBoxLayout(this));
 	layout()->addWidget(new QComboBox(this));
 
@@ -24,13 +31,18 @@ RenderView::~RenderView()
 	SAFE_RELEASE(mSwapChain);
 	SAFE_RELEASE(mSamplerState);
 	SAFE_RELEASE(mBlendState);
+	SAFE_DELETE(mTexturePreviewModel);
 }
 
 void RenderView::Render2DTexture(const Texture* pTexture)
 {
-	Model model;
+	TexturePreviewMaterial* material = (TexturePreviewMaterial*)mTexturePreviewModel->GetMaterial();
 
-	const TexturePreviewMaterial* material = model.GetMaterial();
+	TexturePreviewInfo info = material->GetTexturePreviewInfo();
+	info.mForceMip		 = mForcedMipmap;
+	info.mRenderChannels = mRenderChannels;
+	info.mGrayScaleOutput= mGrayScaleOutput;
+	material->SetTexturePreviewInfo(info);
 
 	ID3D11DeviceContext* context = DXDevice::GetContext();
 
@@ -62,7 +74,7 @@ void RenderView::Render2DTexture(const Texture* pTexture)
 	context->RSSetViewports(1, &viewport);
 
 
-	ID3D11Buffer* vertexBuffer = model.GetVertexBuffer();
+	ID3D11Buffer* vertexBuffer = mTexturePreviewModel->GetVertexBuffer();
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexStride, &offset);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetInputLayout((ID3D11InputLayout*)material->GetInputLayout());
@@ -254,6 +266,38 @@ void RenderView::Clear(const QColor& pClearColor)
 	clearColors[2] = pClearColor.blueF();
 	clearColors[3] = 1;
 	DXDevice::GetContext()->ClearRenderTargetView(mRenderTargetView, clearColors);
+}
+
+void RenderView::SetCurrentPixelShader(const wchar_t* pShaderName)
+{
+	TexturePreviewMaterial* material = mTexturePreviewModel->GetMaterial();
+	material->ReleasePixelShader();
+	material->SetPixelShader(ShaderManager::LoadShader(pShaderName));
+}
+
+const Shader* RenderView::GetCurrentPixelShader()
+{
+	if (mTexturePreviewModel != nullptr)
+	{
+		return mTexturePreviewModel->GetMaterial()->GetPixelShader();
+	}
+	return nullptr;
+}
+
+void RenderView::SetCurrentVertexShader(const wchar_t* pShaderName)
+{
+	TexturePreviewMaterial* material = mTexturePreviewModel->GetMaterial();
+	material->ReleaseVertexShader();
+	material->SetVertexShader(ShaderManager::LoadShader(pShaderName));
+}
+
+const Shader* RenderView::GetCurrentVertexShader()
+{
+	if (mTexturePreviewModel != nullptr)
+	{
+		return mTexturePreviewModel->GetMaterial()->GetVertexShader();
+	}
+	return nullptr;
 }
 
 void RenderView::Blit()

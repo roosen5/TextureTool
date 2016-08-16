@@ -29,3 +29,9 @@ void Texture::Set2DTexture(ID3D11Texture2D* pTexture2D)
 	mHeight = textureDesc.Height;
 	m2DTexture = pTexture2D;
 }
+
+const Surface* Texture::GetSurface(int pIndex) const
+{
+	assert(pIndex < mSurfaceList.size());
+	return mSurfaceList[pIndex];
+}

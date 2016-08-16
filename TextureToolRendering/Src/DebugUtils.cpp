@@ -7,5 +7,5 @@ void ShowError(HRESULT pResult, const char* pCalledFunction, QWidget* pParentWid
 	QString errorMsg = QString("Function %1 failed\nError:\n\n%2")
 		.arg(pCalledFunction, QString::fromWCharArray(error.ErrorMessage()));
 	QMessageBox msgBox;
-	msgBox.critical(pParentWidget, "Initialization failed", errorMsg);
+	msgBox.critical(pParentWidget, "Error", errorMsg);
 }
