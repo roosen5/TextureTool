@@ -81,9 +81,6 @@ protected:
 
 	virtual void                 dropEvent(QDropEvent *event) override;
 
-	// Catch resize events
-	virtual void                 resizeEvent(QResizeEvent *event) override;
-
 private slots:
 
 	// when the user presses the render diffuse icon
@@ -98,6 +95,8 @@ private slots:
 	// Catch changing mipmap user control
 	void                         OnPreviewMipmapCBIndexChanged();
 
+	// Catch when the render view is getting resized, because we have to render the texture again
+	void                         OnTexturePreviewRVResized();
 	// Called when the user presses the "convert" button
 	void                         OnConvertBtnPressed();
 

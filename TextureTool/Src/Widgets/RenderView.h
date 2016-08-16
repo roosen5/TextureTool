@@ -57,6 +57,8 @@ public:
 	// Renders the actual frame to the QT Widget.
 	void                    Blit();
 
+signals:
+	void                    Resized();
 protected:
 
 	// The render target view

@@ -36,12 +36,6 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuRender_Settings">
-    <property name="title">
-     <string>Render Settings</string>
-    </property>
-   </widget>
-   <addaction name="menuRender_Settings"/>
   </widget>
   <widget class="QToolBar" name="mToolBar">
    <attribute name="toolBarArea">
@@ -54,7 +48,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="TextureToolRendering.qrc"/>
+  <include location="TextureTool.qrc"/>
  </resources>
  <connections/>
 </ui>

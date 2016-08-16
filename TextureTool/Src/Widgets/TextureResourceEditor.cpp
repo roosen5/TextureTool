@@ -31,12 +31,13 @@ TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 	UpdateRenderPreviewTypeCB();
 
 
-	connect(mUi.mTextureSelector,		SIGNAL(currentRowChanged(int)),              SLOT(OnTextureSelectorRowChanged()));
-	connect(mUi.mTextureSelector,   	SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem* )));
-	connect(mUi.mCompressionTypeCB, 	SIGNAL(currentIndexChanged(int)),            SLOT(OnCompressionTypeIndexChanged()));
-	connect(mUi.mConvertBtn,        	SIGNAL(pressed()),                           SLOT(OnConvertBtnPressed()));
-	connect(mUi.mPreviewMipmapCB,   	SIGNAL(currentIndexChanged(int)),            SLOT(OnPreviewMipmapCBIndexChanged()));
-	connect(mUi.mRenderPreviewTypeCB,   SIGNAL(currentIndexChanged(int)),            SLOT(OnRenderPreviewTypeCBIndexChanged()));
+	connect(mUi.mTextureSelector,         SIGNAL(currentRowChanged(int)),              SLOT(OnTextureSelectorRowChanged()));
+	connect(mUi.mTextureSelector,         SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem* )));
+	connect(mUi.mCompressionTypeCB,       SIGNAL(currentIndexChanged(int)),            SLOT(OnCompressionTypeIndexChanged()));
+	connect(mUi.mConvertBtn,              SIGNAL(pressed()),                           SLOT(OnConvertBtnPressed()));
+	connect(mUi.mPreviewMipmapCB,         SIGNAL(currentIndexChanged(int)),            SLOT(OnPreviewMipmapCBIndexChanged()));
+	connect(mUi.mRenderPreviewChannelsCB, SIGNAL(currentIndexChanged(int)),            SLOT(OnRenderPreviewTypeCBIndexChanged()));
+	connect(mUi.mTexturePreviewRV,        SIGNAL(Resized()),                           SLOT(OnTexturePreviewRVResized()));
 }
 
 TextureResourceEditor::~TextureResourceEditor()
@@ -172,6 +173,11 @@ void TextureResourceEditor::OnPreviewMipmapCBIndexChanged()
 	UpdateTextureInfo();
 }
 
+void TextureResourceEditor::OnTexturePreviewRVResized()
+{
+	RenderPreviewImage();
+}
+
 void TextureResourceEditor::OnConvertBtnPressed()
 {
 	// If the currentrow is -1, it means that nothing is selected, so return
@@ -187,7 +193,7 @@ void TextureResourceEditor::OnConvertBtnPressed()
 
 void TextureResourceEditor::OnRenderPreviewTypeCBIndexChanged()
 {
-	int channels = mUi.mRenderPreviewTypeCB->currentData().value<int>();
+	int channels = mUi.mRenderPreviewChannelsCB->currentData().value<int>();
 	mUi.mTexturePreviewRV->SetRenderChannels(channels);
 	RenderPreviewImage();
 }
@@ -359,15 +365,13 @@ HRESULT TextureResourceEditor::LoadTexture(const char* pFileName, Texture*& pOut
 
 void TextureResourceEditor::UpdateRenderPreviewTypeCB()
 {
-	mUi.mRenderPreviewTypeCB->addItem("RGBA(Blended)", QVariant::fromValue<int>(0xFFFFFFFF));
-	mUi.mRenderPreviewTypeCB->addItem("RGB",		   QVariant::fromValue<int>(0xFFFFFF00));
+	mUi.mRenderPreviewChannelsCB->addItem("RGBA(Blended)", QVariant::fromValue<int>(0xFFFFFFFF));
+	mUi.mRenderPreviewChannelsCB->addItem("RGB",		   QVariant::fromValue<int>(0xFFFFFF00));
 
-	mUi.mRenderPreviewTypeCB->addItem("Red",		   QVariant::fromValue<int>(0xFF000000));
-	mUi.mRenderPreviewTypeCB->addItem("Green",		   QVariant::fromValue<int>(0x00FF0000));
-	mUi.mRenderPreviewTypeCB->addItem("Blue",		   QVariant::fromValue<int>(0x0000FF00));
-	mUi.mRenderPreviewTypeCB->addItem("Alpha",		   QVariant::fromValue<int>(0x000000FF));
-
-	mUi.mRenderPreviewTypeCB->addItem("Normal map",	   QVariant::fromValue<int>(0x000000FF));
+	mUi.mRenderPreviewChannelsCB->addItem("Red",		   QVariant::fromValue<int>(0xFF000000));
+	mUi.mRenderPreviewChannelsCB->addItem("Green",		   QVariant::fromValue<int>(0x00FF0000));
+	mUi.mRenderPreviewChannelsCB->addItem("Blue",		   QVariant::fromValue<int>(0x0000FF00));
+	mUi.mRenderPreviewChannelsCB->addItem("Alpha",		   QVariant::fromValue<int>(0x000000FF));
 }
 
 void TextureResourceEditor::SetupSupportedTextureFormats()
@@ -508,11 +512,6 @@ void TextureResourceEditor::dragEnterEvent(QDragEnterEvent* pEvent)
 			}
 		}
 	}
-}
-
-void TextureResourceEditor::resizeEvent(QResizeEvent* pEvent)
-{
-	RenderPreviewImage();
 }
 
 // TextureEntry implementation

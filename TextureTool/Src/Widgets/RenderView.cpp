@@ -136,7 +136,9 @@ void RenderView::OnResized()
 void RenderView::resizeEvent(QResizeEvent* pEvent)
 {
 	Base::resizeEvent(pEvent);
+	setFixedHeight(width());
 	OnResized();
+	emit Resized();
 }
 
 HRESULT RenderView::Initialize()
