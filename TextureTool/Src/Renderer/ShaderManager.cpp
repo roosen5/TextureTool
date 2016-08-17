@@ -55,7 +55,7 @@ Shader* ShaderManager::LoadShader(const wchar_t* pShaderName)
 		Shader* shader = new Shader();
 		ID3D11DeviceChild* dxshaderPtr=nullptr;
 		ID3D10Blob* dxshaderBlob=nullptr;
-		HRESULT result = SEC_E_OK;
+		HRESULT result = S_OK;
 		switch (RetrieveShaderType(pShaderName))
 		{
 		case stPixelShader:

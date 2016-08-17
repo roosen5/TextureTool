@@ -2,7 +2,9 @@
 
 TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 	: QWidget(parent),
+	mSharpeningFilter(nullptr),
 	mCheckerboardTexture(nullptr),
+	mConfigureSharpeningFilterAction(nullptr),
 	mImportTextureAction(nullptr),
 	mRenderDiffuseAction(nullptr),
 	mRenderNormalMapAction(nullptr),
@@ -26,20 +28,27 @@ TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 
 	LoadTexture("checkerboard.png", mCheckerboardTexture);
 
+	// Create the sharpening filter and editor
+	mSharpeningFilter = new SharpeningFilter(this);
+
+	mUi.mConfigureSharpeningFilterBtn->setEnabled(false);
 	// Enable the customContextMenuRequested signal to be emitted
 	mUi.mTextureSelector->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	UpdateRenderPreviewTypeCB();
 
-	connect(mUi.mTextureSelector,         SIGNAL(currentRowChanged(int)),              SLOT(OnTextureSelectorRowChanged()));
-	connect(mUi.mTextureSelector,         SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem* )));
-	connect(mUi.mTextureSelector,         SIGNAL(customContextMenuRequested(QPoint)),  SLOT(OnTextureSelectorContextMenuRequested()));
-	connect(mUi.mCompressionTypeCB,       SIGNAL(currentIndexChanged(int)),            SLOT(OnCompressionTypeCBIndexChanged()));
-	connect(mUi.mConvertBtn,              SIGNAL(pressed()),                           SLOT(OnConvertBtnPressed()));
-	connect(mUi.mPreviewMipmapCB,         SIGNAL(currentIndexChanged(int)),            SLOT(OnPreviewMipmapCBIndexChanged()));
-	connect(mUi.mRenderPreviewChannelsCB, SIGNAL(currentIndexChanged(int)),            SLOT(OnRenderPreviewTypeCBIndexChanged()));
-	connect(mUi.mTexturePreviewRV,        SIGNAL(Resized()),                           SLOT(OnTexturePreviewRVResized()));
-	connect(mUi.mTexturePreviewRV,        SIGNAL(Resized()),                           SLOT(OnTexturePreviewRVResized()));
+	connect(mUi.mTextureSelector,              SIGNAL(currentRowChanged(int)),              SLOT(OnTextureSelectorRowChanged()));
+	connect(mUi.mTextureSelector,              SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem*)));
+	connect(mUi.mTextureSelector,              SIGNAL(customContextMenuRequested(QPoint)),  SLOT(OnTextureSelectorContextMenuRequested()));
+	connect(mUi.mCompressionTypeCB,            SIGNAL(currentIndexChanged(int)),            SLOT(OnCompressionTypeCBIndexChanged()));
+	connect(mUi.mConvertBtn,                   SIGNAL(pressed()),                           SLOT(OnConvertBtnPressed()));
+	connect(mUi.mPreviewMipmapCB,              SIGNAL(currentIndexChanged(int)),            SLOT(OnPreviewMipmapCBIndexChanged()));
+	connect(mUi.mRenderPreviewChannelsCB,      SIGNAL(currentIndexChanged(int)),            SLOT(OnRenderPreviewTypeCBIndexChanged()));
+	connect(mUi.mTexturePreviewRV,             SIGNAL(Resized()),                           SLOT(OnTexturePreviewRVResized()));
+	connect(mUi.mTexturePreviewRV,             SIGNAL(Resized()),                           SLOT(OnTexturePreviewRVResized()));
+	connect(mUi.mConfigureSharpeningFilterBtn, SIGNAL(pressed()),                           SLOT(OnConfigureSharpeningFilterBtnPressed()));
+
+	connect(mUi.mUseSharpeningFilterCheckbox,  SIGNAL(stateChanged(int)),                   SLOT(OnUseSharpeningFilterCheckboxChanged()));
 }
 
 TextureResourceEditor::~TextureResourceEditor()
@@ -76,9 +85,22 @@ void TextureResourceEditor::Setup(MainFrm* pMainFrm)
 	textureMenu->addAction(mDeleteSelectedTextureAction);
 
 
+	QMenu* configMenu = menuBar->addMenu("Config");
+
+	// Add option to configure the sharpening
+	mConfigureSharpeningFilterAction = new QAction(this);
+	mConfigureSharpeningFilterAction->setText("Configure Sharpening Filter");
+	mConfigureSharpeningFilterAction->setIcon(QIcon(":/TextureToolRendering/SharpeningIcon"));
+	mConfigureSharpeningFilterAction->setCheckable(true);
+	configMenu->addAction(mConfigureSharpeningFilterAction);
+
+	connect(mConfigureSharpeningFilterAction, SIGNAL(triggered()), SLOT(SharpeningFilterActionTriggered()));
+
 
 	// Add a sub menu called "Rendering" in the top menubar
 	QMenu* renderingMenu = menuBar->addMenu("Rendering");
+
+
 
 	// Add option to switch to the diffuse render shader
 	mRenderDiffuseAction = new QAction(this);
@@ -108,10 +130,11 @@ void TextureResourceEditor::Setup(MainFrm* pMainFrm)
 
 	
 	// Create a spacer that is a widget, since you can't add QSpacerItems to a toolbar
-	QWidget* spacer = new QWidget(this);
-	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); 
+	QWidget* renderModeSpacerWidget = new QWidget(this);
+	renderModeSpacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	toolBar->addWidget(spacer);
+	toolBar->addWidget(renderModeSpacerWidget);
+	mRenderModeSpacerAction = toolBar->actions()[(toolBar->actions().count() - 1)];
 	toolBar->addWidget(new QLabel("Render shader: ", this));
 
 	toolBar->addAction(mRenderDiffuseAction);
@@ -138,19 +161,19 @@ void TextureResourceEditor::UpdateTextureSelector()
 
 	for (int i = 0; i < mTextureList.size(); i++)
 	{
-		QListWidgetItem* Item = new QListWidgetItem();
+		QListWidgetItem* item = new QListWidgetItem();
 
 		// Get the filename from the original texture, converted texture might be nullptr
 		Texture* texture = mTextureList[i]->originalTexture;
 		QString textureFileName = texture->GetFileName();
-		Item->setText(QTToBaseName(textureFileName.toLatin1().data()));
+		item->setText(QTToBaseName(textureFileName.toLatin1().data()));
 
 		// Set the data of this item to the TextureEntry pointer
 		QVariant data;
 		data.setValue<void*>(mTextureList[i]);
-		Item->setData(Qt::UserRole, data);
+		item->setData(Qt::UserRole, data);
 
-		mUi.mTextureSelector->addItem(Item);
+		mUi.mTextureSelector->addItem(item);
 	}
 	mUi.mTextureSelector->blockSignals(false);
 	// Set the row back to where it was when it called the function
@@ -200,6 +223,11 @@ void TextureResourceEditor::RevealCurrentTextureInExplorer()
 	assert(textureEntry != nullptr);
 	Texture* texture = textureEntry->originalTexture;
 	QTExplorerOpenFileFolder(texture->GetFileName().toLatin1().data());
+}
+
+void TextureResourceEditor::SharpeningFilterActionTriggered()
+{
+	mSharpeningFilter->Configure();
 }
 
 void TextureResourceEditor::RevealInExplorerActionTriggered()
@@ -298,8 +326,6 @@ void TextureResourceEditor::OnTextureSelectorRowChanged()
 	SetCBCompressionTypesEnabled(textureIsPowerOfTwo);
 	SetSupportedTextureCBToFormat(texture->GetFormat());
 	UpdateMipmapCB();
-	// Set the mipmap back to (auto)
-	mUi.mTexturePreviewRV->SetForcedMipmap(MIPMAP_AUTO);
 	if (!QTIsPowerOfTwo(texture->GetFirstSurface()))
 	{
 		mMainFrm->SetStatusBar("Current texture is not power of two so it can not use block compression");
@@ -323,6 +349,18 @@ void TextureResourceEditor::OnPreviewMipmapCBIndexChanged()
 void TextureResourceEditor::OnTexturePreviewRVResized()
 {
 	RenderPreviewImage();
+}
+
+void TextureResourceEditor::OnConfigureSharpeningFilterBtnPressed()
+{
+	mSharpeningFilter->Configure();
+}
+
+void TextureResourceEditor::OnUseSharpeningFilterCheckboxChanged()
+{
+	bool checked = mUi.mUseSharpeningFilterCheckbox->isChecked();
+	mUi.mConfigureSharpeningFilterBtn->setEnabled(checked);
+	mSharpeningFilter->SetSharpeningEnabled(checked);
 }
 
 void TextureResourceEditor::OnConvertBtnPressed()
@@ -373,8 +411,6 @@ void TextureResourceEditor::OnCompressionTypeCBIndexChanged()
 	{
 		mMainFrm->SetStatusBar("Use the NormalMap shader for this compression type");
 	}
-
-	ConvertTexture(format, textureEntry); // MATHIJS DELETE
 }
 
 void TextureResourceEditor::UpdateRenderingMenuAndToolbar()
@@ -546,6 +582,7 @@ void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat, TextureEntry* pT
 	assert(originalTexture != nullptr);
 	TextureConverter converter;
 	converter.SetOriginalTexture(originalTexture);
+	converter.SetSharpeningFilter(mSharpeningFilter);
 	converter.SetGenerateMipmaps(mUi.mGenerateMipmapsCheckbox->isChecked());
 	converter.SetDstFormat(pFormat);
 	Texture* convertedTexture = nullptr;
@@ -553,6 +590,11 @@ void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat, TextureEntry* pT
 	if FAILED(result)
 	{
 		ShowError(result, "converter.Convert(convertedTexture)");
+		mMainFrm->SetStatusBar("Conversion failed");
+	}
+	else
+	{
+		mMainFrm->SetStatusBar("Conversion succeeded");
 	}
 	pTextureEntry->convertedTexture = convertedTexture;
 	RenderPreviewImage();
@@ -646,8 +688,10 @@ Texture* TextureResourceEditor::GetPreviewingTexture()
 	}
 	TextureEntry* textureEntry = mTextureList[mUi.mTextureSelector->currentRow()];
 	Texture* previewTexture = textureEntry->convertedTexture;
-	if(previewTexture ==nullptr)
+	if (previewTexture == nullptr)
+	{
 		previewTexture = textureEntry->originalTexture;
+	}
 	assert(previewTexture != nullptr); // Converted texture may be null, but the original may not, since we checked for non selection
 	return previewTexture;
 }

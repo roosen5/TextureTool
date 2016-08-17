@@ -4,6 +4,7 @@
 int main(int argc, char *argv[])
 {
 	QApplication application(argc, argv);
+
 	MainFrm mainFrm;
 	mainFrm.show();
 	mainFrm.GetTextureResourceEditor()->RenderPreviewImage();

@@ -5,5 +5,9 @@
         <file alias="ImportTextureIcon">Resources/Icons/ImportTextureIcon.png</file>
         <file alias="ReveilInExplorerIcon">Resources/Icons/RevealFileInExplorerIcon.png</file>
         <file alias="TrashIcon">Resources/Icons/TrashIcon.png</file>
+        <file alias="SharpeningIcon">Resources/Icons/Sharpener.png</file>
+        <file alias="QDarkStyleStyleSheet">Resources/StyleSheets/QDarkStyle.qss</file>
+        <file alias="DayIcon">Resources/Icons/DayIcon.png</file>
+        <file alias="NightIcon">Resources/Icons/NightIcon.png</file>
     </qresource>
 </RCC>

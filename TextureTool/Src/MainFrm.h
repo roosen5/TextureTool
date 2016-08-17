@@ -30,9 +30,15 @@ public:
 	QAction*						GetImportTextureAction() { return mUi.mImportTextureAction; }
 
 
+	// Toggle between night mode
+	void                            ToggleNightMode();
+
 	private slots:
 	// When the user triggers the action to exit the application (In the file menu)
 	void                            OnExitApplicationClicked();
+
+	// When the user presses the night mode icon
+	void                            OnToggleNightModeActionClicked();
 
 private:
 	Ui::MainFrm                     mUi;
@@ -44,6 +50,8 @@ protected:
 	// The texture editor
 	TextureResourceEditor*          mTextureResourceEditor;
 
+	// Toggle that makes the entire application load a night mode stylesheet
+	QAction*                        mToggleNightModeAction;
 };
 
 #endif // TEXTURETOOLRENDERING_H

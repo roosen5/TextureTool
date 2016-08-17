@@ -110,11 +110,10 @@ HRESULT TextureConverter::Process(Texture*& pOutTexture)
 	assert(pOutTexture == nullptr);
 	pOutTexture = new Texture();
 
-	// Compress surface here //
 	SurfaceList surfaceList;
 
 	// First generate the mipmaps, as the mipmap generator does not work with block compressed images
-	HRESULT result;
+	HRESULT result = S_OK;
 	if (mGenerateMipmaps)
 	{
 		result = GenerateMipmaps(mSrcTexture->GetFirstSurface(), surfaceList);
@@ -124,6 +123,19 @@ HRESULT TextureConverter::Process(Texture*& pOutTexture)
 		Surface* surface = new Surface();
 		surface->Assign(mSrcTexture->GetFirstSurface());
 		surfaceList.push_back(surface);
+	}
+
+	if (mSharpeningFilter->GetSharpeningEnabled())
+	{
+		int surfaceIndex = 0;
+		if (mSharpeningFilter->GetOnlyApplyOnMipmaps())
+		{
+			surfaceIndex++;
+		}
+		for (; surfaceIndex < surfaceList.size(); surfaceIndex++)
+		{
+			mSharpeningFilter->ApplyKernelToSurface(surfaceList[surfaceIndex]);
+		}
 	}
 
 	if (mDstFormat != mSrcTexture->GetFirstSurface()->GetFormat()) // Dont do anything if its already the desired type

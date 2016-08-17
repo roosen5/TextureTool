@@ -13,6 +13,7 @@
 #include "DXUtils.h"
 #include "Widgets/TextureResourceEditor.h"
 #include "Widgets/RenderView.h"
+#include "Widgets/SharpeningFilter.h"
 #include "MainFrm.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Surface.h"

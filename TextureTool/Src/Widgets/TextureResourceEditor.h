@@ -8,6 +8,8 @@ FORWARD_DECLARE_CLASS(Texture)
 FORWARD_DECLARE_CLASS(RenderView)
 FORWARD_DECLARE_CLASS(RenderInterface)
 FORWARD_DECLARE_CLASS(MainFrm)
+FORWARD_DECLARE_CLASS(SharpeningFilter)
+
 
 Q_DECLARE_METATYPE(DXGI_FORMAT)
 
@@ -36,6 +38,9 @@ public:
 
 	// Clears the screen and renders the current preview image
 	void                         RenderPreviewImage();
+
+	// Retrieve the spacer, mainfrm needs it to it to know where the spacing begins, and insert buttons before it
+	QAction*                     GetRenderModeSpacer() { return mRenderModeSpacerAction; }
 protected:
 	void                         SetPreviewTexture(Texture* pPreviewTexture);
 
@@ -76,6 +81,7 @@ protected:
 	// Adds the texture to the resource list
 	TextureEntry*                AddTexture(const Texture* pTexture);
 
+	// Returns the original if there's no converted texture
 	Texture*                     GetPreviewingTexture();
 
 	// Drag and drop functions
@@ -90,8 +96,10 @@ protected:
 private slots:
 
 // These actions can either be triggered in the toolbar, or in one of the the menu's
+	// when the user triggers the shapening filter action
+	void                         SharpeningFilterActionTriggered();
 
-	// when the user triggers the reveil in folder action
+	// when the user triggers the reveal in folder action
 	void                         RevealInExplorerActionTriggered();
 
 	// when the user triggers the delete selected texture action
@@ -115,6 +123,13 @@ private slots:
 
 	// Catch when the render view is getting resized, because we have to render the texture again
 	void                         OnTexturePreviewRVResized();
+
+	// When the user presses the "Configure Sharpening Filter" button
+	void                         OnConfigureSharpeningFilterBtnPressed();
+
+	// When the user checks the "use sharpening filter" checkbox on/off, disable/enable the "Configure Sharpening Filter" button
+	void                         OnUseSharpeningFilterCheckboxChanged();
+
 	// Called when the user presses the "convert" button
 	void                         OnConvertBtnPressed();
 
@@ -130,6 +145,9 @@ private slots:
 	void                         OnCompressionTypeCBIndexChanged();
 
 private:
+
+	// The action that openes the sharpening filter dialog
+	QAction*                     mConfigureSharpeningFilterAction;
 
 	// The action that openes the filedialog, retrieved from mainfrm during setup
 	QAction*                     mImportTextureAction;
@@ -157,6 +175,12 @@ private:
 
 	// The RenderInterface used to preview images 
 	RenderInterface*             mTexturePreviewRI; 
+
+	// The sharping filter, also acts as the editor
+	SharpeningFilter*            mSharpeningFilter;
+
+	// This action has a widget that acts as a spacer, since you can't add QSpacerItems to a toolbar
+	QAction*                     mRenderModeSpacerAction; 
 
 	// Ptr to the MainFrm, the main window/form
 	MainFrm*					 mMainFrm;
