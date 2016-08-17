@@ -2,9 +2,12 @@
 
 TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 	: QWidget(parent),
-	  mCheckerboardTexture(nullptr),
-	  mRenderDiffuseAction(nullptr),
-	  mRenderNormalMapAction(nullptr)
+	mCheckerboardTexture(nullptr),
+	mImportTextureAction(nullptr),
+	mRenderDiffuseAction(nullptr),
+	mRenderNormalMapAction(nullptr),
+	mRevealInExplorerAction(nullptr),
+	mDeleteSelectedTextureAction(nullptr)
 {
 	mUi.setupUi(this);
 
@@ -23,20 +26,19 @@ TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 
 	LoadTexture("checkerboard.png", mCheckerboardTexture);
 
-	mUi.mTextureSelector->setCurrentRow(0);
-	RenderPreviewImage();
-
-	UpdateTextureInfo();
+	// Enable the customContextMenuRequested signal to be emitted
+	mUi.mTextureSelector->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	UpdateRenderPreviewTypeCB();
 
-
 	connect(mUi.mTextureSelector,         SIGNAL(currentRowChanged(int)),              SLOT(OnTextureSelectorRowChanged()));
 	connect(mUi.mTextureSelector,         SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(OnTextureSelectorItemDoubleClicked(QListWidgetItem* )));
-	connect(mUi.mCompressionTypeCB,       SIGNAL(currentIndexChanged(int)),            SLOT(OnCompressionTypeIndexChanged()));
+	connect(mUi.mTextureSelector,         SIGNAL(customContextMenuRequested(QPoint)),  SLOT(OnTextureSelectorContextMenuRequested()));
+	connect(mUi.mCompressionTypeCB,       SIGNAL(currentIndexChanged(int)),            SLOT(OnCompressionTypeCBIndexChanged()));
 	connect(mUi.mConvertBtn,              SIGNAL(pressed()),                           SLOT(OnConvertBtnPressed()));
 	connect(mUi.mPreviewMipmapCB,         SIGNAL(currentIndexChanged(int)),            SLOT(OnPreviewMipmapCBIndexChanged()));
 	connect(mUi.mRenderPreviewChannelsCB, SIGNAL(currentIndexChanged(int)),            SLOT(OnRenderPreviewTypeCBIndexChanged()));
+	connect(mUi.mTexturePreviewRV,        SIGNAL(Resized()),                           SLOT(OnTexturePreviewRVResized()));
 	connect(mUi.mTexturePreviewRV,        SIGNAL(Resized()),                           SLOT(OnTexturePreviewRVResized()));
 }
 
@@ -54,15 +56,39 @@ void TextureResourceEditor::Setup(MainFrm* pMainFrm)
 {
 	mMainFrm = pMainFrm;
 
+
+	QMenuBar* menuBar = mMainFrm->GetMenuBar();
+
+	// Add a sub menu called "Texture" in the top menubar
+	QMenu* textureMenu = menuBar->addMenu("Texture");
+
+	mRevealInExplorerAction = new QAction(this);
+	mRevealInExplorerAction->setText("Reveil current texture in explorer");
+	mRevealInExplorerAction->setIcon(QIcon(":/TextureToolRendering/ReveilInExplorerIcon"));
+
+	textureMenu->addAction(mRevealInExplorerAction);
+
+	mDeleteSelectedTextureAction = new QAction(this);
+	mDeleteSelectedTextureAction->setText("Deletes the currently selected texture");
+	mDeleteSelectedTextureAction->setIcon(QIcon(":/TextureToolRendering/TrashIcon"));
+	mDeleteSelectedTextureAction->setShortcut(QKeySequence::Delete);
+
+	textureMenu->addAction(mDeleteSelectedTextureAction);
+
+
+
+	// Add a sub menu called "Rendering" in the top menubar
+	QMenu* renderingMenu = menuBar->addMenu("Rendering");
+
+	// Add option to switch to the diffuse render shader
 	mRenderDiffuseAction = new QAction(this);
 	mRenderDiffuseAction->setText("Render with diffuse shader");
 	mRenderDiffuseAction->setIcon(QIcon(":/TextureToolRendering/DiffuseIcon"));
 	mRenderDiffuseAction->setCheckable(true);
-
-	QMenuBar* menuBar = mMainFrm->GetMenuBar();
-	mRenderingMenu = menuBar->addMenu("Rendering");
+	renderingMenu->addAction(mRenderDiffuseAction);
 
 
+	// Add option to switch to the normalmap render shader
 	mRenderNormalMapAction = new QAction(this);
 	mRenderNormalMapAction->setText("Render with normal map shader");
 	mRenderNormalMapAction->setIcon(QIcon(":/TextureToolRendering/NormalMapIcon"));
@@ -71,14 +97,41 @@ void TextureResourceEditor::Setup(MainFrm* pMainFrm)
 
 	QToolBar* toolBar = mMainFrm->GetToolBar();
 
-	connect(mRenderDiffuseAction,       SIGNAL(triggered()), SLOT(RenderDiffuseActionTriggered()));
-	connect(mRenderNormalMapAction,     SIGNAL(triggered()), SLOT(RenderNormalMapActionTriggered()));
 
-	UpdateRenderingMenu();
+	renderingMenu->addAction(mRenderNormalMapAction);
+
+	mImportTextureAction = mMainFrm->GetImportTextureAction();
+
+	toolBar->addAction(mImportTextureAction);
+
+	toolBar->addSeparator();
+
+	
+	// Create a spacer that is a widget, since you can't add QSpacerItems to a toolbar
+	QWidget* spacer = new QWidget(this);
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); 
+
+	toolBar->addWidget(spacer);
+	toolBar->addWidget(new QLabel("Render shader: ", this));
+
+	toolBar->addAction(mRenderDiffuseAction);
+
+	toolBar->addAction(mRenderNormalMapAction);
+
+	UpdateRenderingMenuAndToolbar();
+
+	// Connect the actions
+	connect(mRevealInExplorerAction, SIGNAL(triggered()), SLOT(RevealInExplorerActionTriggered()));
+	connect(mDeleteSelectedTextureAction, SIGNAL(triggered()), SLOT(DeleteSelectedTextureActionTriggered()));
+
+	connect(mRenderDiffuseAction, SIGNAL(triggered()), SLOT(RenderDiffuseActionTriggered()));
+	connect(mRenderNormalMapAction, SIGNAL(triggered()), SLOT(RenderNormalMapActionTriggered()));
+	connect(mImportTextureAction, SIGNAL(triggered()), SLOT(ImportTextureActionTriggered()));
 }
 
 void TextureResourceEditor::UpdateTextureSelector()
 {
+	const int rowBuffer = mUi.mTextureSelector->currentRow();
 	// Make sure signals don't get trigged while clearing/adding items
 	mUi.mTextureSelector->blockSignals(true);
 	mUi.mTextureSelector->clear();
@@ -100,6 +153,11 @@ void TextureResourceEditor::UpdateTextureSelector()
 		mUi.mTextureSelector->addItem(Item);
 	}
 	mUi.mTextureSelector->blockSignals(false);
+	// Set the row back to where it was when it called the function
+	if (rowBuffer != -1)
+	{
+		mUi.mTextureSelector->setCurrentRow(rowBuffer);
+	}
 }
 
 void TextureResourceEditor::UpdateMipmapCB()
@@ -128,18 +186,101 @@ void TextureResourceEditor::UpdateMipmapCB()
 	mUi.mPreviewMipmapCB->blockSignals(false);
 }
 
+void TextureResourceEditor::RevealCurrentTextureInExplorer()
+{
+	QListWidgetItem* currentItem = mUi.mTextureSelector->currentItem();
+
+	// Don't do anything if nothing is selected
+	if (currentItem == nullptr)
+		return;
+
+	TextureEntry* textureEntry =(TextureEntry*)currentItem->data(Qt::UserRole).value<void*>();
+
+	// If there's an item, there has to be an textureEntry attached to it
+	assert(textureEntry != nullptr);
+	Texture* texture = textureEntry->originalTexture;
+	QTExplorerOpenFileFolder(texture->GetFileName().toLatin1().data());
+}
+
+void TextureResourceEditor::RevealInExplorerActionTriggered()
+{
+	RevealCurrentTextureInExplorer();
+}
+
+void TextureResourceEditor::DeleteSelectedTextureActionTriggered()
+{
+	const int index = mUi.mTextureSelector->currentRow();
+	// If the currentrow is -1, it means that nothing is selected, so return
+	if (index == -1)
+	{
+		mMainFrm->SetStatusBar("None selected");
+		return;
+	}
+	TextureEntry* textureEntry = mTextureList[index];
+	int DEBUG_Before = mTextureList.size();
+	mTextureList.erase(mTextureList.begin() + index, mTextureList.begin() + index+1);
+	int DEBUG_After = mTextureList.size();
+	delete textureEntry;
+	UpdateTextureSelector();
+}
+
 void TextureResourceEditor::RenderDiffuseActionTriggered()
 {
 	mUi.mTexturePreviewRV->SetCurrentPixelShader(PSTEXTUREPREVIEWSHADERNAME_DIFFUSE);
-	UpdateRenderingMenu();
+	UpdateRenderingMenuAndToolbar();
 	RenderPreviewImage();
 }
 
 void TextureResourceEditor::RenderNormalMapActionTriggered()
 {
 	mUi.mTexturePreviewRV->SetCurrentPixelShader(PSTEXTUREPREVIEWSHADERNAME_NORMALMAP);
-	UpdateRenderingMenu();
+	UpdateRenderingMenuAndToolbar();
 	RenderPreviewImage();
+}
+
+void TextureResourceEditor::ImportTextureActionTriggered()
+{
+	// Add every image file to be opened under "Any image file"
+	QString filter = "Any image file (";
+	QByteArrayList supportedImageFormats= QImageReader::supportedImageFormats();
+	for (int i = 0; i < supportedImageFormats.count(); i++)
+	{
+		filter += "*." + supportedImageFormats[i]+ " ";
+	}
+	filter += ")";
+
+	// Also add all the supported images to be opened seperately
+	for (int i = 0; i < supportedImageFormats.count(); i++)
+	{
+		filter += "*." + supportedImageFormats[i];
+		 // If its the last iteration, don't add the seperator
+		if (i != supportedImageFormats.count() - 1)
+		{
+			filter += ";;";
+		}
+	}
+	QStringList imageFiles = QFileDialog::getOpenFileNames(this, "Import Textures", "", filter);
+	for (int i = 0; i < imageFiles.count(); i++)
+	{
+		// Load and add the textures to the list 
+		Texture* texture = nullptr;
+		HRESULT result = LoadTexture(imageFiles[i].toLatin1().data(), texture);
+		if FAILED(result)
+		{
+			if (result == E_READINGFILEFAILED)
+			{
+				QMessageBox msgBox;
+				msgBox.critical(this, "Loading file failed", "Error loading image");
+			}
+			else if (result != E_UNSUPPORTEDFILE) // Don't report unsupported file errors 
+			{
+				ShowError(result, "ImportTexture");
+			}
+			continue;
+		}
+		AddTexture(texture);
+
+	}
 }
 
 void TextureResourceEditor::OnTextureSelectorRowChanged()
@@ -153,10 +294,16 @@ void TextureResourceEditor::OnTextureSelectorRowChanged()
 	Texture* texture = GetPreviewingTexture();
 	RenderPreviewImage();
 	UpdateTextureInfo();
+	const bool textureIsPowerOfTwo = QTIsPowerOfTwo(texture->GetFirstSurface());
+	SetCBCompressionTypesEnabled(textureIsPowerOfTwo);
 	SetSupportedTextureCBToFormat(texture->GetFormat());
 	UpdateMipmapCB();
 	// Set the mipmap back to (auto)
 	mUi.mTexturePreviewRV->SetForcedMipmap(MIPMAP_AUTO);
+	if (!QTIsPowerOfTwo(texture->GetFirstSurface()))
+	{
+		mMainFrm->SetStatusBar("Current texture is not power of two so it can not use block compression");
+	}
 }
 
 void TextureResourceEditor::OnPreviewMipmapCBIndexChanged()
@@ -200,12 +347,19 @@ void TextureResourceEditor::OnRenderPreviewTypeCBIndexChanged()
 
 void TextureResourceEditor::OnTextureSelectorItemDoubleClicked(QListWidgetItem* pItem)
 {
-	TextureEntry* textureEntry = (TextureEntry*)pItem->data(Qt::UserRole).value<void*>();
-	Texture* texture = textureEntry->originalTexture;
-	QTExplorerOpenFileFolder(texture->GetFileName().toLatin1().data());
+	mRevealInExplorerAction->trigger();
 }
 
-void TextureResourceEditor::OnCompressionTypeIndexChanged()
+
+void TextureResourceEditor::OnTextureSelectorContextMenuRequested()
+{
+	QMenu menu(this);
+	menu.addAction(mRevealInExplorerAction);
+	menu.addAction(mDeleteSelectedTextureAction);
+	menu.exec(QCursor::pos());
+}
+
+void TextureResourceEditor::OnCompressionTypeCBIndexChanged()
 {
 	// If the currentrow is -1, it means that nothing is selected, so return
 	if (mUi.mTextureSelector->currentRow() == -1)
@@ -214,24 +368,22 @@ void TextureResourceEditor::OnCompressionTypeIndexChanged()
 	}
 	TextureEntry* textureEntry = mTextureList[mUi.mTextureSelector->currentRow()];
 
-	DXGI_FORMAT cbFormat = mUi.mCompressionTypeCB->currentData().value<DXGI_FORMAT>();
-	ConvertTexture(cbFormat, textureEntry);
+	DXGI_FORMAT format = mUi.mCompressionTypeCB->currentData().value<DXGI_FORMAT>();
+	if (format == DXGI_FORMAT_BC5_UNORM || DXGI_FORMAT_BC5_SNORM)
+	{
+		mMainFrm->SetStatusBar("Use the NormalMap shader for this compression type");
+	}
+
+	ConvertTexture(format, textureEntry); // MATHIJS DELETE
 }
 
-void TextureResourceEditor::UpdateRenderingMenu()
+void TextureResourceEditor::UpdateRenderingMenuAndToolbar()
 {
-	mRenderingMenu->clear();
 	const Shader* currentPixelShader = mTexturePreviewRV->GetCurrentPixelShader();
 
 	mRenderDiffuseAction->setChecked(currentPixelShader->GetShaderName().compare(PSTEXTUREPREVIEWSHADERNAME_DIFFUSE) == 0);
-	mRenderingMenu->addAction(mRenderDiffuseAction);
 
 	mRenderNormalMapAction->setChecked(currentPixelShader->GetShaderName().compare(PSTEXTUREPREVIEWSHADERNAME_NORMALMAP) == 0);
-	mRenderingMenu->addAction(mRenderNormalMapAction);
-
-	mMainFrm->GetToolBar()->addAction(mRenderDiffuseAction);
-
-	mMainFrm->GetToolBar()->addAction(mRenderNormalMapAction);
 }
 
 void TextureResourceEditor::dragLeaveEvent(QDragLeaveEvent* pEvent)
@@ -245,6 +397,7 @@ void TextureResourceEditor::dropEvent(QDropEvent* pEvent)
 
 	for (int i = 0; i < pEvent->mimeData()->urls().count(); i++)
 	{
+		// Load and add the textures to the list 
 		Texture* texture = nullptr;
 		QUrl Url = pEvent->mimeData()->urls()[i];
 		QString path = Url.toLocalFile();
@@ -430,6 +583,33 @@ void TextureResourceEditor::SetSupportedTextureCBToFormat(DXGI_FORMAT pFormat)
 	}
 }
 
+void TextureResourceEditor::SetCBCompressionTypesEnabled(bool pEnabled)
+{
+	const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(mUi.mCompressionTypeCB->model());
+
+	for (int i = 0; i < mUi.mCompressionTypeCB->count(); i++)
+	{
+		QVariant variant = mUi.mCompressionTypeCB->itemData(i);
+		DXGI_FORMAT format = variant.value<DXGI_FORMAT>();
+		// Get the index of the value to disable
+		QStandardItem* item = model->item(i);
+
+		// If the format is block compressed, and the Block compression -
+		// -types need to be disabled (pEnabled ==true), disable the item
+		if(!pEnabled&&!DXIsBlockCompressed(format) || pEnabled)
+		{
+			item->setToolTip("");
+			item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+		}
+		else
+		{
+			item->setToolTip("Texture is not block compressed");
+			item->setFlags(~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));
+		}
+	}
+
+}
+
 void TextureResourceEditor::UpdateTextureInfo()
 {
 	Texture* texture = GetPreviewingTexture();
@@ -474,10 +654,6 @@ Texture* TextureResourceEditor::GetPreviewingTexture()
 
 void TextureResourceEditor::RenderPreviewImage()
 {
-	Texture* previewTexture = GetPreviewingTexture();
-	if (previewTexture == nullptr)
-		return;
-
 	// Clear the screen with the alpha checkerboard texture,
 	// Make sure we render it with all the channels, 
 	// Copying the current channels in this buffer
@@ -486,6 +662,14 @@ void TextureResourceEditor::RenderPreviewImage()
 	mTexturePreviewRV->SetRenderChannels(0xFFFFFFFF);
 	mTexturePreviewRV->Render2DTexture(mCheckerboardTexture);
 	mTexturePreviewRV->SetRenderChannels(renderChannelsBuffer);
+
+	Texture* previewTexture = GetPreviewingTexture();
+	if (previewTexture == nullptr) // If theres no active texture, stop here
+	{
+		// Still blit the cleared/checkerboarded image 
+		mTexturePreviewRV->Blit();
+		return;
+	}
 
 	// Render the preview texture
 	mTexturePreviewRV->Render2DTexture(previewTexture);

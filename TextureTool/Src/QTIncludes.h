@@ -4,6 +4,9 @@
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QToolBar>  
+#include <QtWidgets/QFileDialog>  
+#include <QtGui/QStandardItemModel>
 #include <QtGui/QScreen>
 #include <QtGui/QPixmap>
 #include <QtGui/QImageReader>

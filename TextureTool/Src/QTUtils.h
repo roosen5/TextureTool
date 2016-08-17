@@ -1,4 +1,5 @@
 #pragma once
+FORWARD_DECLARE_CLASS(Surface)
 
 // Checks if the extension is supported
 bool        QTSupportsImageFormat(const char* pImageFilePath);
@@ -16,4 +17,4 @@ QString     QTToBaseName(const char* pFilePath);
 DXGI_FORMAT QTFromImageFormat(QImage::Format pFormat);
 
 // Check if the image is a power of 2 (Required for block compression)
-bool        QTIsPowerOfTwo(QImage* pImage);
+bool        QTIsPowerOfTwo(const Surface* pImage);

@@ -25,6 +25,12 @@
       </property>
       <widget class="QListWidget" name="mTextureSelector"/>
       <widget class="QFrame" name="mTextureToolsPropertiesFrame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
@@ -67,7 +73,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="mCompressionTypeCB"/>
+              <widget class="QComboBox" name="mCompressionTypeCB">
+               <property name="toolTip">
+                <string>Select the compression type that  you want
+Make sure the input images are a power of two, or it wont be able to be compressed</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -110,6 +121,9 @@
               </item>
               <item>
                <widget class="QCheckBox" name="mGenerateMipmapsCheckbox">
+                <property name="toolTip">
+                 <string>To generate mipmaps, make sure you check this</string>
+                </property>
                 <property name="text">
                  <string>Generate mipmaps</string>
                 </property>
@@ -120,16 +134,16 @@
            </item>
            <item>
             <widget class="QPushButton" name="mConvertBtn">
+             <property name="toolTip">
+              <string>Press this to convert the selected texture</string>
+             </property>
              <property name="text">
               <string>Convert</string>
              </property>
             </widget>
            </item>
           </layout>
-          <zorder>mCompressionTypeCB</zorder>
           <zorder>mConvertBtn</zorder>
-          <zorder>label</zorder>
-          <zorder>mCompressionTypeCB</zorder>
           <zorder>frame_3</zorder>
          </widget>
         </item>
@@ -184,7 +198,11 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="mRenderPreviewChannelsCB"/>
+              <widget class="QComboBox" name="mRenderPreviewChannelsCB">
+               <property name="toolTip">
+                <string>Set the mode that the texture will be previewed</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -198,7 +216,11 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="mPreviewMipmapCB"/>
+              <widget class="QComboBox" name="mPreviewMipmapCB">
+               <property name="currentText">
+                <string/>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -222,6 +244,12 @@
       </widget>
      </widget>
      <widget class="QFrame" name="mPreviewRenderFrame">
+      <property name="maximumSize">
+       <size>
+        <width>1024</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="frameShape">
        <enum>QFrame::Box</enum>
       </property>

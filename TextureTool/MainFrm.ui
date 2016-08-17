@@ -36,6 +36,15 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="mImportTextureAction"/>
+    <addaction name="separator"/>
+    <addaction name="mExitApplicationAction"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mToolBar">
    <attribute name="toolBarArea">
@@ -45,6 +54,27 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QStatusBar" name="mStatusBar"/>
+  <action name="mImportTextureAction">
+   <property name="icon">
+    <iconset resource="TextureTool.qrc">
+     <normaloff>:/TextureToolRendering/ImportTextureIcon</normaloff>:/TextureToolRendering/ImportTextureIcon</iconset>
+   </property>
+   <property name="text">
+    <string>Import textures</string>
+   </property>
+   <property name="statusTip">
+    <string>Import a texture, or multiple</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="mExitApplicationAction">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

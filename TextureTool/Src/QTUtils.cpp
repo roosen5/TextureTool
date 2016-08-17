@@ -50,13 +50,16 @@ DXGI_FORMAT QTFromImageFormat(QImage::Format pFormat)
 	}
 }
 
-bool QTIsPowerOfTwo(QImage* pImage)
+int IsPowerOfTwo(unsigned int x)
 {
-	const int width = pImage->width();
-	if (!(width & (width - 1)) == 0 (width & (width - 1)) == 0)
+	return ((x != 0) && !(x & (x - 1)));
+}
+
+bool QTIsPowerOfTwo(const Surface* pImage)
+{
+	if (!IsPowerOfTwo(pImage->GetWidth()))
 		return false;
-	const int height = pImage->height();
-	if (!(height & (height - 1)) == 0 (height & (height - 1)) == 0)
+	if (!IsPowerOfTwo(pImage->GetHeight()))
 		return false;
 	return true;
 }

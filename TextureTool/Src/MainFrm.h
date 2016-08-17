@@ -15,15 +15,24 @@ public:
 	MainFrm(QWidget *parent = 0);
 	~MainFrm();
 
-	TextureResourceEditor*          GetTextureResourceEditor() { return mTextureResourceEditor; }
+	TextureResourceEditor*          GetTextureResourceEditor() { return mTextureResourceEditor; } // MATHIJS MAYBE DELETE
 
+	// Gets the menu bar, other classes want to append on this
 	QMenuBar*                       GetMenuBar() { return mUi.mMenuBar; }
 
+	// Gets the toolbar, other classes want to append on this
 	QToolBar*                       GetToolBar(){ return mUi.mToolBar; };
 
+	// Sets the status bar under the mainfrm to pStatus
+	void                            SetStatusBar(const QString& pStatus);
 
-private slots:
-	void                            Update();
+	// this action exists in the mainfrm, but is setup in the TextureResouceEditor ( MATHIJS FILL IN )
+	QAction*						GetImportTextureAction() { return mUi.mImportTextureAction; }
+
+
+	private slots:
+	// When the user triggers the action to exit the application (In the file menu)
+	void                            OnExitApplicationClicked();
 
 private:
 	Ui::MainFrm                     mUi;
@@ -34,6 +43,7 @@ protected:
 
 	// The texture editor
 	TextureResourceEditor*          mTextureResourceEditor;
+
 };
 
 #endif // TEXTURETOOLRENDERING_H

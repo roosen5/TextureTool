@@ -10,6 +10,7 @@
 #include "QTIncludes.h"
 #include "DebugUtils.h"
 #include "QtUtils.h"
+#include "DXUtils.h"
 #include "Widgets/TextureResourceEditor.h"
 #include "Widgets/RenderView.h"
 #include "MainFrm.h"
