@@ -1,6 +1,4 @@
 #include "TT_PCH.h"
-#pragma hdrstop
-#include "RenderView.h"
 
 RenderView::RenderView(QWidget* pWidget) : 
 	QWidget::QWidget(pWidget), 

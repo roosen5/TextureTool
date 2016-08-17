@@ -1,6 +1,4 @@
 #include "TT_PCH.h"
-#pragma hdrstop
-#include "DXDevice.h"
 
 
 

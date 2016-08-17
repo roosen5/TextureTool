@@ -191,7 +191,9 @@ void TextureResourceEditor::UpdateMipmapCB()
 	// To go back to that index after refreshing
 	int indexBuffer = mUi.mPreviewMipmapCB->currentIndex();
 	if (indexBuffer < 0)
+	{
 		indexBuffer = 0;
+	}
 	mUi.mPreviewMipmapCB->clear();
 	Texture* texture=  GetPreviewingTexture();
 	mUi.mPreviewMipmapCB->addItem("(auto)");
@@ -245,9 +247,7 @@ void TextureResourceEditor::DeleteSelectedTextureActionTriggered()
 		return;
 	}
 	TextureEntry* textureEntry = mTextureList[index];
-	int DEBUG_Before = mTextureList.size();
 	mTextureList.erase(mTextureList.begin() + index, mTextureList.begin() + index+1);
-	int DEBUG_After = mTextureList.size();
 	delete textureEntry;
 	UpdateTextureSelector();
 }
@@ -378,8 +378,10 @@ void TextureResourceEditor::OnConvertBtnPressed()
 
 void TextureResourceEditor::OnRenderPreviewTypeCBIndexChanged()
 {
+	// Obtain the data attached to the current item, the viewchannels
 	int channels = mUi.mRenderPreviewChannelsCB->currentData().value<int>();
 	mUi.mTexturePreviewRV->SetRenderChannels(channels);
+
 	RenderPreviewImage();
 }
 
@@ -391,6 +393,7 @@ void TextureResourceEditor::OnTextureSelectorItemDoubleClicked(QListWidgetItem* 
 
 void TextureResourceEditor::OnTextureSelectorContextMenuRequested()
 {
+	// Open contextmenu at mouse when the user presses right mouse button
 	QMenu menu(this);
 	menu.addAction(mRevealInExplorerAction);
 	menu.addAction(mDeleteSelectedTextureAction);
@@ -417,8 +420,10 @@ void TextureResourceEditor::UpdateRenderingMenuAndToolbar()
 {
 	const Shader* currentPixelShader = mTexturePreviewRV->GetCurrentPixelShader();
 
+	// Set selected when the current pixel shader is diffuse
 	mRenderDiffuseAction->setChecked(currentPixelShader->GetShaderName().compare(PSTEXTUREPREVIEWSHADERNAME_DIFFUSE) == 0);
 
+	// Set selected when the current pixel shader is normalmap
 	mRenderNormalMapAction->setChecked(currentPixelShader->GetShaderName().compare(PSTEXTUREPREVIEWSHADERNAME_NORMALMAP) == 0);
 }
 
