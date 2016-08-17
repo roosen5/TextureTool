@@ -57,7 +57,7 @@ void MainFrm::ToggleNightMode()
 {
 	if (qApp->styleSheet().isEmpty()) // Empty means no stylesheet, means no nightmode
 	{
-		QFile file(":/TextureToolRendering/QDarkStyleStyleSheet");
+		QFile file(":/qdarkstyle/QDarkStyleStyleSheet");
 		file.open(QFile::ReadOnly);
 		QString styleSheet = QLatin1String(file.readAll());
 		qApp->setStyleSheet(styleSheet);

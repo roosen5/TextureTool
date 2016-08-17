@@ -178,6 +178,7 @@ void SharpeningFilter::ApplyKernelToSurface(Surface* pSurface)
 			convertedColorData[pixelIndex] = convertedColor.rgb();
 		}
 	}
+	delete cleanSurface;
 }
 
 void SharpeningFilter::UpdateKernelFilter()
