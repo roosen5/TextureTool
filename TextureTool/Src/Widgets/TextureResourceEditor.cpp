@@ -207,8 +207,8 @@ void TextureResourceEditor::UpdateMipmapCB()
 	// If the index is higher than the amount of mipmaps, clamp it to last mipmap
 	indexBuffer = min(indexBuffer, mUi.mPreviewMipmapCB->count() - 1);
 
-	mUi.mPreviewMipmapCB->setCurrentIndex(indexBuffer);
 	mUi.mPreviewMipmapCB->blockSignals(false);
+	mUi.mPreviewMipmapCB->setCurrentIndex(indexBuffer);
 }
 
 void TextureResourceEditor::RevealCurrentTextureInExplorer()
@@ -676,7 +676,7 @@ void TextureResourceEditor::UpdateTextureInfo()
 
 TextureEntry* TextureResourceEditor::AddTexture(const Texture* pTexture)
 {
-	TextureEntry* textureEntry = new TextureEntry(); // Mathijs maybe stack
+	TextureEntry* textureEntry = new TextureEntry(); 
 	textureEntry->originalTexture = (Texture*)pTexture;
 	textureEntry->convertedTexture = nullptr;
 	mTextureList.push_back(textureEntry);

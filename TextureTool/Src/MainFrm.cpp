@@ -55,7 +55,7 @@ void MainFrm::OnToggleNightModeActionClicked()
 
 void MainFrm::ToggleNightMode()
 {
-	if (qApp->styleSheet().isEmpty()) // Empty means no stylesheet, means no nightmode
+	if (qApp->styleSheet().isEmpty()) // Empty means no stylesheet, means nightmode isn't active
 	{
 		QFile file(":/qdarkstyle/QDarkStyleStyleSheet");
 		file.open(QFile::ReadOnly);

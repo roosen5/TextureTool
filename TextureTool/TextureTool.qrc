@@ -8,5 +8,6 @@
         <file alias="SharpeningIcon">Resources/Icons/Sharpener.png</file>
         <file alias="DayIcon">Resources/Icons/DayIcon.png</file>
         <file alias="NightIcon">Resources/Icons/NightIcon.png</file>
+        <file alias="MainWindowIcon">TextureTool.ico</file>
     </qresource>
 </RCC>

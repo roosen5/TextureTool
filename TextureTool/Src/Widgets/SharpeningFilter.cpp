@@ -133,11 +133,9 @@ void SharpeningFilter::ApplyKernelToSurface(Surface* pSurface)
 			const int pixelIndex = x + y*surfaceWidth;
 
 			// Get the clean pixel color
-			QColor cleanPixelColor((QRgb)cleanColorData[pixelIndex]);
-			if (cleanPixelColor.alphaF() <= 0.0f)
-			{
-				continue;
-			}
+			QColor cleanPixelColor;
+
+			cleanPixelColor=QColor::fromRgba(cleanColorData[pixelIndex]);
 
 			float convertedRed =0;
 			float convertedGreen =0;
@@ -175,7 +173,7 @@ void SharpeningFilter::ApplyKernelToSurface(Surface* pSurface)
 			convertedColor.setGreenF(max(min(1.0f, convertedGreen), 0));
 			convertedColor.setBlueF(max(min(1.0f, convertedBlue), 0));
 			convertedColor.setAlphaF(cleanPixelColor.alphaF());
-			convertedColorData[pixelIndex] = convertedColor.rgb();
+			convertedColorData[pixelIndex] = convertedColor.rgba();
 		}
 	}
 	delete cleanSurface;
