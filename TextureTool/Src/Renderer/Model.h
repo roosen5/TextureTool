@@ -41,7 +41,7 @@ public:
 	void                      SetInputLayout(ID3D11InputLayout* pLayout) { mInputLayout= pLayout; }
 	const ID3D11InputLayout*  GetInputLayout() const { return mInputLayout; }
 
-	// Get and set the previewinfo, to set variables mForceMip and mRenderChannels MATHIJS KEEP UPDATED
+	// Get and set the previewinfo, to set variables mForceMip and mRenderChannels 
 	void					  SetTexturePreviewInfo(const TexturePreviewInfo& pTexturePreviewInfo);
 	TexturePreviewInfo		  GetTexturePreviewInfo() { return mTexturePreviewInfo;}
 	const TexturePreviewInfo  GetTexturePreviewInfo() const { return mTexturePreviewInfo;}

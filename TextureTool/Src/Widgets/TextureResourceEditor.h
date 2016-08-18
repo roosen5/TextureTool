@@ -13,7 +13,7 @@ FORWARD_DECLARE_CLASS(SharpeningFilter)
 
 Q_DECLARE_METATYPE(DXGI_FORMAT)
 
-struct TextureEntry // MATHIJS maybe class
+struct TextureEntry 
 {
 	TextureEntry():originalTexture(nullptr), convertedTexture(nullptr){} 
 	~TextureEntry();

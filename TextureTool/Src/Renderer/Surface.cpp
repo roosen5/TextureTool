@@ -52,7 +52,7 @@ void Surface::LoadFromFile(const char* pFileName)
 	{
 		image = image.convertToFormat(QImage::Format::Format_RGB32);
 	}
-	image = image.rgbSwapped(); //MATHIJS Explain?
+	image = image.rgbSwapped(); // QT loads the images as BGR, so flip it
 	Setup(image.width(), image.height(), image.bytesPerLine(), image.byteCount());
 	assert(mDepthPitch == image.byteCount());
 	memcpy(mData, image.bits(), mDepthPitch);
