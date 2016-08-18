@@ -122,6 +122,9 @@
     <ClCompile Include="Src\DebugUtils.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_RenderView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MainFrm.h">
