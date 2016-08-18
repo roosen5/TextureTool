@@ -128,6 +128,16 @@ void TextureResourceEditor::Setup(MainFrm* pMainFrm)
 
 	toolBar->addAction(mImportTextureAction);
 
+	mExportCurrentTextureAction = new QAction(this);
+	mExportCurrentTextureAction->setIcon(QIcon(":/TextureToolRendering/ExportTextureIcon"));
+
+	mExportCurrentTextureAction->setShortcut(QKeySequence::Save);
+
+	mExportCurrentTextureAction->setText("Save current texture to a *.DDS file");
+	mExportCurrentTextureAction->setEnabled(false);
+
+	toolBar->addAction(mExportCurrentTextureAction);
+
 	toolBar->addSeparator();
 
 	
@@ -146,12 +156,14 @@ void TextureResourceEditor::Setup(MainFrm* pMainFrm)
 	UpdateRenderingMenuAndToolbar();
 
 	// Connect the actions
-	connect(mRevealInExplorerAction, SIGNAL(triggered()), SLOT(RevealInExplorerActionTriggered()));
-	connect(mDeleteSelectedTextureAction, SIGNAL(triggered()), SLOT(DeleteSelectedTextureActionTriggered()));
+	connect(mRevealInExplorerAction,       SIGNAL(triggered()),  SLOT(RevealInExplorerActionTriggered()));
+	connect(mDeleteSelectedTextureAction,  SIGNAL(triggered()),  SLOT(DeleteSelectedTextureActionTriggered()));
 
-	connect(mRenderDiffuseAction, SIGNAL(triggered()), SLOT(RenderDiffuseActionTriggered()));
-	connect(mRenderNormalMapAction, SIGNAL(triggered()), SLOT(RenderNormalMapActionTriggered()));
-	connect(mImportTextureAction, SIGNAL(triggered()), SLOT(ImportTextureActionTriggered()));
+	connect(mRenderDiffuseAction,          SIGNAL(triggered()),  SLOT(RenderDiffuseActionTriggered()));
+	connect(mRenderNormalMapAction,        SIGNAL(triggered()),  SLOT(RenderNormalMapActionTriggered()));
+	connect(mImportTextureAction,          SIGNAL(triggered()),  SLOT(ImportTextureActionTriggered()));
+	connect(mExportCurrentTextureAction,   SIGNAL(triggered()),  SLOT(ExportCurrentTextureActionTriggered()));
+
 }
 
 void TextureResourceEditor::UpdateTextureSelector()
@@ -211,6 +223,23 @@ void TextureResourceEditor::UpdateMipmapCB()
 
 	mUi.mPreviewMipmapCB->blockSignals(false);
 	mUi.mPreviewMipmapCB->setCurrentIndex(indexBuffer);
+}
+
+void TextureResourceEditor::UpdateExportCurrentTextureAction()
+{
+	Texture* texture = GetPreviewingTexture();
+
+	if (texture->GetFormat() != DXGI_FORMAT_BC5_UNORM)
+	{
+		mExportCurrentTextureAction->setEnabled(true);
+		mExportCurrentTextureAction->setText("Export the current texture");
+	}
+	else
+	{
+		// DirectXTex doesn't export these correctly
+		mExportCurrentTextureAction->setEnabled(false);
+		mExportCurrentTextureAction->setText("Exporting BC5 Compressed textures is not supported");
+	}
 }
 
 void TextureResourceEditor::RevealCurrentTextureInExplorer()
@@ -314,11 +343,43 @@ void TextureResourceEditor::ImportTextureActionTriggered()
 	}
 }
 
+void TextureResourceEditor::ExportCurrentTextureActionTriggered()
+{
+	// Use the texture converter to save it, since this class contains the DirectXTex wrappings
+	TextureConverter textureConverter;
+	textureConverter.SetOriginalTexture(GetPreviewingTexture());
+	QString fileName = QFileDialog::getSaveFileName(this, "Export Texture", QString(), "(*.dds)");
+	if (fileName.isEmpty()) // Probably rejected, so return
+		return;
+
+	// Create a wchar 
+	wchar_t* fileNameWChar = new wchar_t[MAX_PATH];
+	ZeroMemory(fileNameWChar, MAX_PATH);
+
+	// Extract  the file path from Qt to our wchar
+	fileName.toWCharArray(fileNameWChar);
+
+	HRESULT result = textureConverter.SaveToFile(fileNameWChar);
+
+	// Delete the wchar
+	delete[] fileNameWChar;
+	if SUCCEEDED(result)
+	{
+		mMainFrm->SetStatusBar("Successfully exported file");
+	}
+	else
+	{
+		ShowError(result, "textureConverter.SaveToFile");
+		mMainFrm->SetStatusBar("Failed to export file");
+	}
+}
+
 void TextureResourceEditor::OnTextureSelectorRowChanged()
 {
-	 //If the currentrow is -1, it means that nothing is selected, so return
+	//If the currentrow is -1, it means that nothing is selected, so return
 	if (mUi.mTextureSelector->currentRow() == -1)
 	{
+		UpdateExportCurrentTextureAction();
 		return;
 	}
 	assert(mUi.mTextureSelector->currentRow() < mTextureList.size());
@@ -329,6 +390,8 @@ void TextureResourceEditor::OnTextureSelectorRowChanged()
 	SetCBCompressionTypesEnabled(textureIsPowerOfTwo);
 	SetSupportedTextureCBToFormat(texture->GetFormat());
 	UpdateMipmapCB();
+	UpdateExportCurrentTextureAction();
+
 	if (!QTIsPowerOfTwo(texture->GetFirstSurface()))
 	{
 		mMainFrm->SetStatusBar("Current texture is not power of two so it can not use block compression");
@@ -617,6 +680,7 @@ void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat, TextureEntry* pT
 	RenderPreviewImage();
 	UpdateTextureInfo();
 	UpdateMipmapCB();
+	UpdateExportCurrentTextureAction();
 }
 
 void TextureResourceEditor::AddSupportedTextureFormat(DXGI_FORMAT pFormat, const QString& pFormatName)

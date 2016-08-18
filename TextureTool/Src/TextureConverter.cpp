@@ -19,6 +19,14 @@ void TextureConverter::CopyDataToStratchImage(DirectX::ScratchImage* pScratchIma
 	memcpy(dstBuffer, srcBuffer, size);
 }
 
+void TextureConverter::CopyDataToStratchImage(DirectX::Image* pScratchImage, const Surface* pSurface)
+{
+	const BYTE* srcBuffer = pSurface->GetData();
+	BYTE* dstBuffer = pScratchImage->pixels;
+	size_t size = pSurface->GetDepthPitch();
+	memcpy(dstBuffer, srcBuffer, size);
+}
+
 void TextureConverter::CopyDataToSurface(Surface* pSurface, const DirectX::ScratchImage* pScratchImage)
 {
 	const BYTE* srcBuffer = pScratchImage->GetPixels();
@@ -101,6 +109,31 @@ HRESULT TextureConverter::GenerateMipmaps(const Surface* pSrcSurface, SurfaceLis
 
 		pSurfaceList.push_back(surface);
 	}
+
+	return result;
+}
+
+HRESULT TextureConverter::SaveToFile(const wchar_t* pFileName)
+{
+	DirectX::ScratchImage scratchImage;
+	HRESULT result = scratchImage.Initialize2D(mSrcTexture->GetFormat(), mSrcTexture->GetFirstSurface()->GetWidth(), 
+											   mSrcTexture->GetFirstSurface()->GetHeight(), 1, mSrcTexture->GetSurfaceCount());
+
+	if FAILED(result)
+	{
+		return result;
+	}
+
+	for (int i = 0; i < mSrcTexture->GetSurfaceCount(); i++)
+	{
+		const Surface* srcSurface = mSrcTexture->GetSurface(i);
+		DirectX::Image* dstImage = (DirectX::Image*) scratchImage.GetImage(i, 0, 0);
+		CopyDataToStratchImage(dstImage, srcSurface);
+	}
+
+	DirectX::ScratchImage convertedImage;
+
+	result = DirectX::SaveToDDSFile(scratchImage.GetImages(), scratchImage.GetImageCount(), scratchImage.GetMetadata(), 0, pFileName);
 
 	return result;
 }

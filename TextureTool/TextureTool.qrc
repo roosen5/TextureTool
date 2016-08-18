@@ -9,5 +9,6 @@
         <file alias="DayIcon">Resources/Icons/DayIcon.png</file>
         <file alias="NightIcon">Resources/Icons/NightIcon.png</file>
         <file alias="MainWindowIcon">TextureTool.ico</file>
+        <file alias="ExportTextureIcon">Resources/Icons/ExportTextureIcon.png</file>
     </qresource>
 </RCC>

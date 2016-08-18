@@ -9,6 +9,7 @@ public:
 
 	// Copy data from surface and place it into scratch image
 	void	          CopyDataToStratchImage(DirectX::ScratchImage* pScratchImage, const Surface* pSurface);
+	void	          CopyDataToStratchImage(DirectX::Image* pScratchImage, const Surface* pSurface);
 
 	// Copy data from scratch image and place it into surface 
 	void	          CopyDataToSurface(Surface* pSurface, const DirectX::ScratchImage* pScratchImage);
@@ -22,6 +23,9 @@ public:
 
 	// Binds the original texture
 	void              SetOriginalTexture(Texture* pTexture) { mSrcTexture = pTexture; }
+
+	// Exports the mSrcTexture to a dds file
+	HRESULT           SaveToFile(const wchar_t* pFileName);
 
 	// Sets the format
 	void              SetDstFormat(DXGI_FORMAT pFormat) { mDstFormat = pFormat; }

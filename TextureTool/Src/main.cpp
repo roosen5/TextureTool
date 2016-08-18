@@ -8,7 +8,6 @@ int main(int argc, char *argv[])
 	// The entire application is run through the MainFrm, keep the main.cpp as clean as possible
 	MainFrm mainFrm;
 	mainFrm.show();
-	mainFrm.GetTextureResourceEditor()->RenderPreviewImage();
 	int returnValue = application.exec();
 	// Application ended, shutdown DirectX
 	DXDevice::ShutDown();

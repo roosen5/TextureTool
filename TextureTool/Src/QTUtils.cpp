@@ -40,6 +40,7 @@ DXGI_FORMAT QTFromImageFormat(QImage::Format pFormat)
 {
 	switch (pFormat)
 	{
+	case QImage::Format_RGBA8888:
 	case QImage::Format_RGB32:
 	case QImage::Format_ARGB32:
 	case QImage::Format_ARGB32_Premultiplied:

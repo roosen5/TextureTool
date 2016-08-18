@@ -15,8 +15,6 @@ public:
 	MainFrm(QWidget *parent = 0);
 	~MainFrm();
 
-	TextureResourceEditor*          GetTextureResourceEditor() { return mTextureResourceEditor; } // MATHIJS MAYBE DELETE
-
 	// Gets the menu bar, other classes want to append on this
 	QMenuBar*                       GetMenuBar() { return mUi.mMenuBar; }
 

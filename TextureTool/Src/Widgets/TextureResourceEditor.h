@@ -13,7 +13,7 @@ FORWARD_DECLARE_CLASS(SharpeningFilter)
 
 Q_DECLARE_METATYPE(DXGI_FORMAT)
 
-struct TextureEntry // MATHIJS maybe class
+struct TextureEntry 
 {
 	TextureEntry():originalTexture(nullptr), convertedTexture(nullptr){} 
 	~TextureEntry();
@@ -49,6 +49,9 @@ protected:
 
 	// updatePreview mipmap combobox 
 	void                         UpdateMipmapCB();
+
+	// Disable it when there's no texture, or when the texture has BC5 compression
+	void                         UpdateExportCurrentTextureAction();
 
 	// Openes explorer and selects the file
 	void                         RevealCurrentTextureInExplorer();
@@ -111,8 +114,11 @@ private slots:
 	// when the user triggers the NormalMap
 	void                         RenderNormalMapActionTriggered();
 
-	// when the user triggers the ImportTextureAction
+	// when the user triggers the mImportTextureAction
 	void                         ImportTextureActionTriggered();
+
+	// when the user triggers the mExportCurrentTextureAction
+	void                         ExportCurrentTextureActionTriggered();
 //
 
 	// Called when the user clicks on a different texture in the textureselector list
@@ -152,11 +158,15 @@ private:
 	// The action that openes the filedialog, retrieved from mainfrm during setup
 	QAction*                     mImportTextureAction;
 
+	// The action that exports the selected texture
+	QAction*                     mExportCurrentTextureAction;
+
 	// The action that sets the renderer to use the diffuse shader
 	QAction*                     mRenderDiffuseAction;
 
 	// The action that sets the renderer to use the normalmap shader
 	QAction*                     mRenderNormalMapAction;
+
 
 	// The action that openes the explorer and reveals the selected texture
 	QAction*                     mRevealInExplorerAction;
