@@ -53,23 +53,23 @@ SharpeningFilter::SharpeningFilter(QWidget *parent)
 {
 	mUi.setupUi(this);
 
-	mLineEditList.push_back(mUi.mLineEditNW);
-	mLineEditList.push_back(mUi.mLineEditN);
-	mLineEditList.push_back(mUi.mLineEditNE);
+	mKernelTextboxList.push_back(mUi.mLineEditNW);
+	mKernelTextboxList.push_back(mUi.mLineEditN);
+	mKernelTextboxList.push_back(mUi.mLineEditNE);
 
-	mLineEditList.push_back(mUi.mLineEditW);
-	mLineEditList.push_back(mUi.mLineEditCenter);
-	mLineEditList.push_back(mUi.mLineEditE);
+	mKernelTextboxList.push_back(mUi.mLineEditW);
+	mKernelTextboxList.push_back(mUi.mLineEditCenter);
+	mKernelTextboxList.push_back(mUi.mLineEditE);
 
-	mLineEditList.push_back(mUi.mLineEditSW);
-	mLineEditList.push_back(mUi.mLineEditS);
-	mLineEditList.push_back(mUi.mLineEditSE);
+	mKernelTextboxList.push_back(mUi.mLineEditSW);
+	mKernelTextboxList.push_back(mUi.mLineEditS);
+	mKernelTextboxList.push_back(mUi.mLineEditSE);
 
 	UpdateKernelFilter();
 
-	for (int i = 0; i < mLineEditList.size(); i++)
+	for (int i = 0; i < mKernelTextboxList.size(); i++)
 	{
-		QLineEdit* lineEdit = mLineEditList[i];
+		QLineEdit* lineEdit = mKernelTextboxList[i];
 		lineEdit->setValidator(new QIntValidator(lineEdit));
 	}
 
@@ -182,12 +182,12 @@ void SharpeningFilter::ApplyKernelToSurface(Surface* pSurface)
 void SharpeningFilter::UpdateKernelFilter()
 {
 	// Update the kernel filter values to the values that are in the textboxes
-	assert(mLineEditList.size() == KERNELMATRIX_LENGTH);
+	assert(mKernelTextboxList.size() == KERNELMATRIX_LENGTH);
 	float divider = (float)mUi.mDividerTB->text().toInt();
 
-	for (int i = 0; i < mLineEditList.size(); i++)
+	for (int i = 0; i < mKernelTextboxList.size(); i++)
 	{
-		QLineEdit* textBox = mLineEditList[i];
+		QLineEdit* textBox = mKernelTextboxList[i];
 		// Apply the divider here
 		float filterValue = (float)textBox->text().toInt() / divider;
 
@@ -214,15 +214,19 @@ void SharpeningFilter::UpdatePresetCB()
 
 void SharpeningFilter::OnPresetCBIndexChanged()
 {
-	assert(mLineEditList.size() == KERNELMATRIX_LENGTH);
+	assert(mKernelTextboxList.size() == KERNELMATRIX_LENGTH);
+
+	// When selecting a preset, the UI has to be filled in with the values of that preset
 
 	KernelPreset* preset = (KernelPreset*)mUi.mPresetsCB->currentData().value<void*>();
-	int* filter = preset->GetFilterList();
-	for (int i = 0; i < mLineEditList.size(); i++)
+	const int* filter = preset->GetFilterList();
+	for (int i = 0; i < mKernelTextboxList.size(); i++)
 	{
-		QLineEdit* textBox = mLineEditList[i];
+		// Sync every kernel text box
+		QLineEdit* textBox = mKernelTextboxList[i];
 		textBox->setText(QString::number(filter[i]));
 	}
+	// Sync the divider
 	mUi.mDividerTB->setText(QString::number(preset->GetDivider()));
 }
 

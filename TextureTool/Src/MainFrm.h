@@ -23,10 +23,10 @@ public:
 	// Gets the toolbar, other classes want to append on this
 	QToolBar*                       GetToolBar(){ return mUi.mToolBar; };
 
-	// Sets the status bar under the mainfrm to pStatus
+	// Sets the status bar under the mainfrm to pStatus, a small message to the user
 	void                            SetStatusBar(const QString& pStatus);
 
-	// this action exists in the mainfrm, but is setup in the TextureResouceEditor ( MATHIJS FILL IN )
+	// this action exists in the mainfrm, but is setup in the TextureResouceEditor, so this is to expose the action
 	QAction*						GetImportTextureAction() { return mUi.mImportTextureAction; }
 
 

@@ -42,16 +42,13 @@
     <Filter Include="Source Files\Widgets">
       <UniqueIdentifier>{30799006-27c0-44a8-ba60-e2f6e7d2e030}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utils">
-      <UniqueIdentifier>{58ec5cc7-a4b2-4899-99f7-e72d7f5bf33f}</UniqueIdentifier>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{e34dc9e6-ed9e-44de-9245-c0f4f6991d5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\TT_PCH.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DebugUtils.cpp">
-      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Src\main.cpp">
       <Filter>Source Files</Filter>
@@ -95,14 +92,8 @@
     <ClCompile Include="GeneratedFiles\Release\moc_TextureResourceEditor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Src\QTUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_TextureTool.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DXUtils.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_MainFrm.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -121,6 +112,15 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_style.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\QTUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DXUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DebugUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,14 +142,14 @@
     <CustomBuild Include="TextureTool.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Src\Widgets\SharpeningFilter.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Src\Widgets\SharpeningFilter.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Resources\StyleSheets\style.qrc">
       <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Widgets\SharpeningFilter.h">
+      <Filter>Source Files\Widgets</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -164,9 +164,6 @@
     </ClInclude>
     <ClInclude Include="Src\TT_PCH.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\DebugUtils.h">
-      <Filter>Source Files\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_TextureResourceEditor.h">
       <Filter>Generated Files</Filter>
@@ -192,23 +189,23 @@
     <ClInclude Include="Src\Renderer\DXIncludes.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Src\TextureConverter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TexturePreviewConstantBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\QTUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_MainFrm.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\DXUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_SharpeningFilter.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\DXUtils.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\QTUtils.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\DebugUtils.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\TextureConverter.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

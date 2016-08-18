@@ -138,7 +138,7 @@ HRESULT TextureConverter::Process(Texture*& pOutTexture)
 		}
 	}
 
-	if (mDstFormat != mSrcTexture->GetFirstSurface()->GetFormat()) // Dont do anything if its already the desired type
+	if (mDstFormat != mSrcTexture->GetFirstSurface()->GetFormat()) // Don't do anything if its already the desired type
 	{
 		result = Compress(mDstFormat, surfaceList);
 	}
@@ -152,7 +152,7 @@ HRESULT TextureConverter::Process(Texture*& pOutTexture)
 
 	int mipmapCount = surfaceList.size();
 
-	// Create texture
+	// Create the 2Dtexture
 	D3D11_TEXTURE2D_DESC textureDesc;
 	textureDesc.Width = firstMip->GetWidth();
 	textureDesc.Height = firstMip->GetHeight();
@@ -167,6 +167,7 @@ HRESULT TextureConverter::Process(Texture*& pOutTexture)
 	textureDesc.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA* initData = new D3D11_SUBRESOURCE_DATA[mipmapCount];
+	// Create initData for every mipmap
 	for (int i = 0; i < mipmapCount; i++)
 	{
 		// Assign all the initialization data's 
@@ -189,6 +190,7 @@ HRESULT TextureConverter::Process(Texture*& pOutTexture)
 
 	ID3D11ShaderResourceView* surfaceResourceView;
 
+	// Create the resourceview
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	memset(&shaderResourceViewDesc, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
 	shaderResourceViewDesc.Format = textureDesc.Format;

@@ -12,10 +12,8 @@ RenderView::RenderView(QWidget* pWidget) :
 	mGrayScaleOutput(false)
 {
 	
+// Simple plane
 	mTexturePreviewModel = new Model();
-
-	setLayout(new QVBoxLayout(this));
-	layout()->addWidget(new QComboBox(this));
 
 // Disable updates, because updates would clear the screen automatically
 	setUpdatesEnabled(false);
@@ -36,6 +34,7 @@ void RenderView::Render2DTexture(const Texture* pTexture)
 {
 	TexturePreviewMaterial* material = (TexturePreviewMaterial*)mTexturePreviewModel->GetMaterial();
 
+	// Dump the TexturePreview info to the shader's constant buffer
 	TexturePreviewInfo info = material->GetTexturePreviewInfo();
 	info.mForceMip		 = mForcedMipmap;
 	info.mRenderChannels = mRenderChannels;
@@ -82,6 +81,7 @@ void RenderView::Render2DTexture(const Texture* pTexture)
 	context->PSSetShaderResources(0, 1, &shaderResourceView);
 	context->VSSetShaderResources(0, 1, &shaderResourceView);
 
+	// In order to render alpha
 	context->OMSetBlendState(mBlendState, nullptr, 0xffffff);
 
 	context->OMSetRenderTargets(1, &mRenderTargetView, nullptr);
@@ -302,7 +302,6 @@ const Shader* RenderView::GetCurrentVertexShader()
 
 void RenderView::Blit()
 {
-	//printf("\n" __FUNCTION__);
 	mSwapChain->Present((UINT)1, 0);
 }
 

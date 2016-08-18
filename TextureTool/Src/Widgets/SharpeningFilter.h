@@ -23,7 +23,8 @@ public:
 	// Override all presets are to override the GetName and return the filter name
 	virtual const char*         GetName() = 0;
 
-	int*                        GetFilterList() { return mFilter; }
+	// Return filter array
+	const int*                  GetFilterList() const { return mFilter; }
 
 	int                         GetDivider() { return mDivider; }
 protected:
@@ -48,6 +49,7 @@ public:
 	// Opens the Sharpening filter editor
 	void                        Configure();
 
+	// If set to false, the entire ApplyKernelToSurface function will be skipped
 	void                        SetSharpeningEnabled(bool pSharpeningEnabled) { mSharpeningEnabled = pSharpeningEnabled; }
 
 	// Applies the sharpening filter to the surface
@@ -65,13 +67,15 @@ public:
 	bool                        GetSharpeningEnabled() { return mSharpeningEnabled; }
 
 private slots:
+	// When the user selects a preset
 	void                        OnPresetCBIndexChanged();
 
 private:
 	// All the possible presets 
 	std::vector<KernelPreset*>  mKernelPresetList;
 
-	std::vector<QLineEdit*>     mLineEditList;
+	std::vector<QLineEdit*>     mKernelTextboxList;
+
 	// The current kernel filter values
 	KernelFilter                mKernelFilter;
 

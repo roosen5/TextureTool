@@ -22,8 +22,10 @@ TextureResourceEditor::TextureResourceEditor(QWidget *parent)
 		ShowError(result, "mTexturePreviewRV->InitializeDirectX");
 	}
 
+	// Enable drag&drop
 	setAcceptDrops(true);
 
+	// Add supported formats to the conversion combobox
 	SetupSupportedTextureFormats();
 
 	LoadTexture("checkerboard.png", mCheckerboardTexture);
@@ -72,7 +74,7 @@ void TextureResourceEditor::Setup(MainFrm* pMainFrm)
 	QMenu* textureMenu = menuBar->addMenu("Texture");
 
 	mRevealInExplorerAction = new QAction(this);
-	mRevealInExplorerAction->setText("Reveil current texture in explorer");
+	mRevealInExplorerAction->setText("Reveal current texture in explorer");
 	mRevealInExplorerAction->setIcon(QIcon(":/TextureToolRendering/ReveilInExplorerIcon"));
 
 	textureMenu->addAction(mRevealInExplorerAction);
@@ -229,6 +231,7 @@ void TextureResourceEditor::RevealCurrentTextureInExplorer()
 
 void TextureResourceEditor::SharpeningFilterActionTriggered()
 {
+	// Opens the sharpening filter dialog
 	mSharpeningFilter->Configure();
 }
 
@@ -277,11 +280,11 @@ void TextureResourceEditor::ImportTextureActionTriggered()
 	}
 	filter += ")";
 
-	// Also add all the supported images to be opened seperately
+	// Also add all the supported images to be opened separately
 	for (int i = 0; i < supportedImageFormats.count(); i++)
 	{
 		filter += "*." + supportedImageFormats[i];
-		 // If its the last iteration, don't add the seperator
+		 // If its the last iteration, don't add the separator
 		if (i != supportedImageFormats.count() - 1)
 		{
 			filter += ";;";
@@ -582,20 +585,29 @@ void TextureResourceEditor::SetupSupportedTextureFormats()
 
 void TextureResourceEditor::ConvertTexture(DXGI_FORMAT pFormat, TextureEntry* pTextureEntry)
 {
+	// Actually do all the compression, convertion and mipmap generation
+
 	SAFE_DELETE(pTextureEntry->convertedTexture);
 	Texture* originalTexture = pTextureEntry->originalTexture;
 	assert(originalTexture != nullptr);
 	TextureConverter converter;
+
+	// Setup the converter
 	converter.SetOriginalTexture(originalTexture);
 	converter.SetSharpeningFilter(mSharpeningFilter);
 	converter.SetGenerateMipmaps(mUi.mGenerateMipmapsCheckbox->isChecked());
 	converter.SetDstFormat(pFormat);
+
 	Texture* convertedTexture = nullptr;
+
+	// Process all the data, create convertTexture
 	HRESULT result = converter.Process(convertedTexture);
+
 	if FAILED(result)
 	{
 		ShowError(result, "converter.Convert(convertedTexture)");
 		mMainFrm->SetStatusBar("Conversion failed");
+		return;
 	}
 	else
 	{
@@ -663,7 +675,7 @@ void TextureResourceEditor::UpdateTextureInfo()
 	if (texture == nullptr)
 		return;
 	int forceMipmap = mUi.mTexturePreviewRV->GetForcedMipmap();
-	// If the forceMipmap is set to -1 (AKA MIPMAP_AUTO), set it to zero
+	// If the forceMipmap is set to -1 (AKA MIPMAP_AUTO), get the first surface
 	forceMipmap = min(max(0, forceMipmap), texture->GetSurfaceCount() - 1);
 
 	QString text = QString("Width: %1, Height: %2\nMipsize: %3\nMipmap count: %4")
